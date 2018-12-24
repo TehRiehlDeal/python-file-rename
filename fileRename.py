@@ -42,13 +42,3 @@ root.title("Rename Show")
 app = App(root)
 
 root.mainloop()
-
-
-"""for file in os.listdir(folder):
-	extension = "." + file.split(".")[len(file.split("."))-1]
-	matched = regex.findall(file)
-	if matched:
-		season = matched[0]
-		season = season.upper()
-		episodeName = show + " " + season + extension
-		os.rename(os.path.join(folder, file), os.path.join(folder, episodeName))"""
