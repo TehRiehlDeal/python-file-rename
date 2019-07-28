@@ -14,7 +14,10 @@ class App:
 
 		def getFiles():
 			global folder
-			folder = tkinter.filedialog.askdirectory(parent=root, initialdir="./", title="Please Select a Directory")
+			if (folder == ""):
+				folder = tkinter.filedialog.askdirectory(parent=root, initialdir="./", title="Please Select a Directory")
+			else:
+				folder = tkinter.filedialog.askdirectory(parent=root, initialdir=folder, title="Please Select a Directory")
 			if (folder == ""):
 				self.folderSelected.delete(0, END)
 				self.folderSelected.insert(0, "No folder selected, try again.")
@@ -30,9 +33,15 @@ class App:
 			for file in os.listdir(folder):
 				extension = "." + file.split(".")[len(file.split("."))-1]
 				if (count < 10):
-					episode = show + " S0" +str(season) + "E0" + str(count) + extension
+					if (int(season) >= 10):
+						episode = show + " S" + str(season) + "E0" + str(count) + extension
+					else:
+						episode = show + " S0" + str(season) + "E0" + str(count) + extension
 				else:
-					episode = show + " S0" +str(season) + "E" + str(count) + extension
+					if (int(season) >= 10):
+						episode = show + " S" +str(season) + "E" + str(count) + extension
+					else:
+						episode = show + " S0" +str(season) + "E" + str(count) + extension
 
 				os.rename(os.path.join(folder, file), os.path.join(folder, episode))
 
@@ -40,8 +49,6 @@ class App:
 
 
 			self.folderSelected.delete(0, END)
-			self.show.delete(0, END)
-			self.season.delete(0, END)
 			delRename()
 
 		def addRename():
