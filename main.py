@@ -3,9 +3,11 @@ import sys
 import re
 from tkinter import *
 import tkinter.filedialog
+import tvdb_api
 
 regex = re.compile(r'S\d*E\d*', re.IGNORECASE)
 dir_path = os.path.dirname(os.path.realpath(__file__))
+t = tvdb_api.Tvdb()
 favicon = os.path.join(dir_path, "favicon.ico")
 folder = ""
 clickCount = 0
@@ -27,21 +29,46 @@ class App:
 				self.folderSelected.delete(0, END)
 				self.folderSelected.insert(0,folder)
 
+		def cleanName(name):
+			newName = name.replace('\\',"")
+			newName = newName.replace("/","")
+			newName = newName.replace(":", "")
+			newName = newName.replace("*", "")
+			newName = newName.replace("?", "")
+			newName = newName.replace('"', "")
+			newName = newName.replace("<", "")
+			newName = newName.replace(">", "")
+			newName = newName.replace("|", "")
+			return newName
+			
 
 		def renameFiles(show, season):
 			count = 1
 			for file in os.listdir(folder):
 				extension = "." + file.split(".")[len(file.split("."))-1]
+				episodeName = cleanName(t[show][int(season)][count]['episodeName'])
 				if (count < 10):
 					if (int(season) >= 10):
-						episode = show + " S" + str(season) + "E0" + str(count) + extension
+						episode = show + " S" + str(season) + "E0" + str(count) + \
+                                                    " " + " " + \
+                                                   	episodeName + \
+                                                  		extension
 					else:
-						episode = show + " S0" + str(season) + "E0" + str(count) + extension
+						episode = show + " S0" + \
+                                                    str(season) + "E0" + str(count) + " " + \
+                                                    episodeName + \
+                                                   	extension
 				else:
 					if (int(season) >= 10):
-						episode = show + " S" +str(season) + "E" + str(count) + extension
+						episode = show + " S" + \
+                                                    str(season) + "E" + str(count) + " " + \
+                                                    episodeName + \
+                                                   	extension
 					else:
-						episode = show + " S0" +str(season) + "E" + str(count) + extension
+						episode = show + " S0" + \
+                                                    str(season) + "E" + str(count) + " " + \
+                                                    episodeName + \
+                                                   	extension
 
 				os.rename(os.path.join(folder, file), os.path.join(folder, episode))
 
