@@ -101,7 +101,7 @@ class App:
 		self.folderSelected = Entry(master, width="50")
 		self.folderSelected.grid(row=2,column=1)
 
-		self.openFiles = Button(master, text="Select Folder", command=getFiles)
+		self.openFiles = Button(master, text="Select Folder", command=getFolder)
 		self.openFiles.grid(row=3)
 		self.quit = Button(master, text="Quit", command=root.destroy)
 		self.quit.grid(row=3,column=1)
