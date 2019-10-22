@@ -1,2 +1,3 @@
 Config.ini
 tvdbAPI.py
+__pycache__/*
