@@ -13,7 +13,7 @@ clickCount = 0
 class App:
 	def __init__(self,master):
 
-		def getFiles():
+		def getFolder():
 			global folder
 			if (folder == ""):
 				folder = filedialog.askdirectory(parent=root, initialdir="./", title="Please Select a Directory")
