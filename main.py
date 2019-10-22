@@ -1,8 +1,7 @@
 import os
 import sys
 import re
-from tkinter import *
-import tkinter.filedialog
+from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk
 import tvdb_api
 
 regex = re.compile(r'S\d*E\d*', re.IGNORECASE)
@@ -17,9 +16,9 @@ class App:
 		def getFiles():
 			global folder
 			if (folder == ""):
-				folder = tkinter.filedialog.askdirectory(parent=root, initialdir="./", title="Please Select a Directory")
+				folder = filedialog.askdirectory(parent=root, initialdir="./", title="Please Select a Directory")
 			else:
-				folder = tkinter.filedialog.askdirectory(parent=root, initialdir=folder, title="Please Select a Directory")
+				folder = filedialog.askdirectory(parent=root, initialdir=folder, title="Please Select a Directory")
 			if (folder == ""):
 				self.folderSelected.delete(0, END)
 				self.folderSelected.insert(0, "No folder selected, try again.")
