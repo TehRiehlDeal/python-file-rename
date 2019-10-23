@@ -2,11 +2,11 @@ import os
 import sys
 import re
 from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk
-import tvdb_api
+from tvdbAPI import TVDB
 
 regex = re.compile(r'S\d*E\d*', re.IGNORECASE)
 dir_path = os.path.dirname(os.path.realpath(__file__))
-t = tvdb_api.Tvdb()
+t = TVDB()
 favicon = os.path.join(dir_path, "favicon.ico")
 folder = ""
 clickCount = 0
@@ -14,6 +14,8 @@ class App:
 	def __init__(self,master):
 
 		def getFolder():
+			""" Opens a folder select window for user to select the folder in which the show is located, and sets
+				the global variable 'folder' to that folder. Also adds or removes the rename button accordingly. """
 			global folder
 			if (folder == ""):
 				folder = filedialog.askdirectory(parent=root, initialdir="./", title="Please Select a Directory")
@@ -27,8 +29,8 @@ class App:
 				addRename()                        
 				self.folderSelected.delete(0, END)
 				self.folderSelected.insert(0,folder)
-
 		def cleanName(name):
+			""" sned"""
 			newName = name.replace('\\',"")
 			newName = newName.replace("/","")
 			newName = newName.replace(":", "")
@@ -47,7 +49,7 @@ class App:
 			count = 1
 			for file in os.listdir(folder):
 				extension = "." + file.split(".")[len(file.split("."))-1]
-				episodeName = cleanName(t[show][int(season)][count]['episodeName'])
+				episodeName = t.getEpisodeName(show, int(season), count)
 				if (count < 10):
 					if (int(season) >= 10):
 						episode = show + " S" + str(season) + "E0" + str(count) + \
