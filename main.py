@@ -29,18 +29,6 @@ class App:
 				addRename()                        
 				self.folderSelected.delete(0, END)
 				self.folderSelected.insert(0,folder)
-		def cleanName(name):
-			""" sned"""
-			newName = name.replace('\\',"")
-			newName = newName.replace("/","")
-			newName = newName.replace(":", "")
-			newName = newName.replace("*", "")
-			newName = newName.replace("?", "")
-			newName = newName.replace('"', "")
-			newName = newName.replace("<", "")
-			newName = newName.replace(">", "")
-			newName = newName.replace("|", "")
-			return newName
 			
 		def searchShow(event):
 			print (self.show.get())
