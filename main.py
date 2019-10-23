@@ -31,48 +31,52 @@ class App:
 				self.folderSelected.insert(0,folder)
 			
 		def searchShow(event):
+			""" WIP to be used for live searching of show """
 			print (self.show.get())
 
 		def renameFiles(show, season):
+			""" Takes in the given show title and season number and renames all files within the folder. """
 			count = 1
 			for file in os.listdir(folder):
 				extension = "." + file.split(".")[len(file.split("."))-1]
-				episodeName = t.getEpisodeName(show, int(season), count)
-				if (count < 10):
-					if (int(season) >= 10):
-						episode = show + " S" + str(season) + "E0" + str(count) + \
-                                                    " " + " " + \
-                                                   	episodeName + \
-                                                  		extension
+				if (extension == ".mp4" or extension == ".mkv" or extension == ".avi" or extension == ".mov"):
+					episodeName = t.getEpisodeName(show, int(season), count)
+					if (count < 10):
+						if (int(season) >= 10):
+							episode = show + " S" + str(season) + "E0" + str(count) + \
+														" " + " " + \
+														episodeName + \
+															extension
+						else:
+							episode = show + " S0" + \
+														str(season) + "E0" + str(count) + " " + \
+														episodeName + \
+														extension
 					else:
-						episode = show + " S0" + \
-                                                    str(season) + "E0" + str(count) + " " + \
-                                                    episodeName + \
-                                                   	extension
-				else:
-					if (int(season) >= 10):
-						episode = show + " S" + \
-                                                    str(season) + "E" + str(count) + " " + \
-                                                    episodeName + \
-                                                   	extension
-					else:
-						episode = show + " S0" + \
-                                                    str(season) + "E" + str(count) + " " + \
-                                                    episodeName + \
-                                                   	extension
+						if (int(season) >= 10):
+							episode = show + " S" + \
+														str(season) + "E" + str(count) + " " + \
+														episodeName + \
+														extension
+						else:
+							episode = show + " S0" + \
+														str(season) + "E" + str(count) + " " + \
+														episodeName + \
+														extension
 
-				os.rename(os.path.join(folder, file), os.path.join(folder, episode))
+					os.rename(os.path.join(folder, file), os.path.join(folder, episode))
 
-				count+=1
-
-
+					count+=1
+					
 			self.folderSelected.delete(0, END)
 			delRename()
 
 		def addRename():
+			""" Adds the button used to rename the files in a folder. """
 			self.rename.config(command=lambda:renameFiles(self.show.get(), self.season.get()), state=ACTIVE, relief=RAISED)
 
 		def delRename():
+			""" Deletes the rename button when no folder is selected. """
 			self.rename.config(state=DISABLED, relief=SUNKEN)
 
 		self.input = Label(master, text="Show Name:")
