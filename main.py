@@ -10,6 +10,7 @@ t = TVDB()
 favicon = os.path.join(dir_path, "favicon.ico")
 folder = ""
 clickCount = 0
+validExtensions = ['.mp4', '.mkv', '.avi', '.m4v', '.mov', '.ts', '.m2ts']
 class App:
 	def __init__(self,master):
 
@@ -39,14 +40,14 @@ class App:
 			count = 1
 			for file in os.listdir(folder):
 				extension = "." + file.split(".")[len(file.split("."))-1]
-				if (extension == ".mp4" or extension == ".mkv" or extension == ".avi" or extension == ".mov"):
+				if (extension in validExtensions):
 					episodeName = t.getEpisodeName(show, int(season), count)
 					if (count < 10):
 						if (int(season) >= 10):
 							episode = show + " S" + str(season) + "E0" + str(count) + \
-														" " + " " + \
+														" " + \
 														episodeName + \
-															extension
+														extension
 						else:
 							episode = show + " S0" + \
 														str(season) + "E0" + str(count) + " " + \
@@ -105,6 +106,7 @@ class App:
 
 root = Tk()
 root.geometry("477x89")
+root.resizable(False, False)
 root.iconbitmap(favicon)
 root.title("Rename Show")
 app = App(root)
