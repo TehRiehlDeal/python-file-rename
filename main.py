@@ -83,7 +83,7 @@ class App:
 		self.input = Label(master, text="Show Name:")
 		self.input.grid(row=0)
 		self.show = Entry(master, width="50")
-		self.show.bind("<Key>", searchShow)
+		self.show.bind("<KeyRelease>", searchShow)
 		self.show.grid(row=0,column=1)
 
 		self.seasonInput = Label(master, text="Season Number:")
