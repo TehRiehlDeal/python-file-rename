@@ -75,7 +75,7 @@ class App:
 
 					count+=1
 			self.output.configure(state=NORMAL)
-			self.output.insert('end', "Renaming Complete.")
+			self.output.insert('end', "Renaming Complete.\n")
 			self.output.configure(state=DISABLED)
 			self.output.see("end")
 			self.output.update_idletasks()
