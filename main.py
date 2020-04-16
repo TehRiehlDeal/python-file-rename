@@ -1,7 +1,7 @@
 import os
 import sys
 import re
-from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk
+from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk, Text, NORMAL
 from tvdbAPI import TVDB
 
 regex = re.compile(r'S\d*E\d*', re.IGNORECASE)
@@ -65,9 +65,20 @@ class App:
 														episodeName + \
 														extension
 
+					self.output.configure(state=NORMAL)
+					self.output.insert('end', 'Renaming: ' + file + "\n")
+					self.output.configure(state=DISABLED)
+					self.output.see('end')
+					self.output.update_idletasks()
+					print("Renaming: " + file)
 					os.rename(os.path.join(folder, file), os.path.join(folder, episode))
 
 					count+=1
+			self.output.configure(state=NORMAL)
+			self.output.insert('end', "Renaming Complete.")
+			self.output.configure(state=DISABLED)
+			self.output.see("end")
+			self.output.update_idletasks()
 					
 			self.folderSelected.delete(0, END)
 			delRename()
@@ -104,8 +115,11 @@ class App:
 		self.rename = Button(master, text="Rename Files", state=DISABLED, relief=SUNKEN)
 		self.rename.grid(row=0, column=3, columnspan=2, rowspan=4, sticky='WENS')
 
+		self.output = Text(master, state=DISABLED)
+		self.output.place(x=0, y=90, width=477, height=199)
+
 root = Tk()
-root.geometry("477x89")
+root.geometry("477x289") #477x89
 root.resizable(False, False)
 root.iconbitmap(favicon)
 root.title("Rename Show")
