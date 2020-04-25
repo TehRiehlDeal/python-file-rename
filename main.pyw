@@ -1,7 +1,7 @@
 import os
 import sys
 import re
-from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk, Text, NORMAL
+from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk, Text, NORMAL, font
 from tvdbAPI import TVDB
 
 regex = re.compile(r'S\d*E\d*', re.IGNORECASE)
@@ -14,7 +14,7 @@ validExtensions = ['.mp4', '.mkv', '.avi', '.m4v', '.mov', '.ts', '.m2ts']
 class App:
 	def __init__(self,master):
 
-		def getFolder():
+		def getFolder(event):
 			""" Opens a folder select window for user to select the folder in which the show is located, and sets
 				the global variable 'folder' to that folder. Also adds or removes the rename button accordingly. """
 			global folder
@@ -66,7 +66,7 @@ class App:
 														extension
 
 					self.output.configure(state=NORMAL)
-					self.output.insert('end', 'Renaming: ' + file + "\n")
+					self.output.insert('end', 'Renaming: ' + file + " --> " + episode + "\n")
 					self.output.configure(state=DISABLED)
 					self.output.see('end')
 					self.output.update_idletasks()
@@ -92,34 +92,46 @@ class App:
 			self.rename.config(state=DISABLED, relief=SUNKEN)
 
 		self.input = Label(master, text="Show Name:")
-		self.input.grid(row=0)
-		self.show = Entry(master, width="50")
+		#self.input.grid(row=0)
+		self.input.place(x=200, y=0)
+		self.show = Entry(master)
 		self.show.bind("<KeyRelease>", searchShow)
-		self.show.grid(row=0,column=1)
+		self.show.place(x=273, y=0, width=477, height=22)
+		#self.show.grid(row=0,column=1)
 
 		self.seasonInput = Label(master, text="Season Number:")
-		self.seasonInput.grid(row=1)
+		self.seasonInput.place(x=180, y=23)
+		#self.seasonInput.grid(row=1)
 		self.season = Entry(master, width="50")
-		self.season.grid(row=1,column=1)
-
+		self.season.place(x=273, y=23, width=477, height=22)
+		#self.season.grid(row=1,column=1)
+		
 		self.selectedFolder = Label(master, text="Selected Folder:")
-		self.selectedFolder.grid(row=2)
+		self.selectedFolder.place(x=184, y=46)
+		#self.selectedFolder.grid(row=2)
 		self.folderSelected = Entry(master, width="50")
-		self.folderSelected.grid(row=2,column=1)
-
-		self.openFiles = Button(master, text="Select Folder", command=getFolder)
-		self.openFiles.grid(row=3)
-		self.quit = Button(master, text="Quit", command=root.destroy)
-		self.quit.grid(row=3,column=1)
+		self.folderSelected.bind("<Button-1>", getFolder)
+		self.folderSelected.place(x=273, y=46, width=477, height=22)
+		#self.folderSelected.grid(row=2,column=1)
 
 		self.rename = Button(master, text="Rename Files", state=DISABLED, relief=SUNKEN)
-		self.rename.grid(row=0, column=3, columnspan=2, rowspan=4, sticky='WENS')
+		self.rename.place(x=750, y=0, width=80, height=69)
+		#self.rename.grid(row=0, column=3, columnspan=2, rowspan=4, sticky='WENS')
+
+		"""
+		self.openFiles = Button(master, text="Select Folder", command=getFolder)
+		self.openFiles.grid(row=3)
+
+		self.quit = Button(master, text="Quit", command=root.destroy)
+		self.quit.grid(row=3,column=1)"""
+		self.Font = font.Font(size=8)
 
 		self.output = Text(master, state=DISABLED)
-		self.output.place(x=0, y=90, width=477, height=199)
+		self.output['font'] = self.Font
+		self.output.place(x=0, y=70, width=1024, height=219)
 
 root = Tk()
-root.geometry("477x289") #477x89
+root.geometry("1024x289") #477x89
 root.resizable(False, False)
 root.iconbitmap(favicon)
 root.title("Rename Show")
