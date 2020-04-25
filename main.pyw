@@ -110,6 +110,7 @@ class App:
 		self.selectedFolder.place(x=184, y=46)
 		#self.selectedFolder.grid(row=2)
 		self.folderSelected = Entry(master, width="50")
+		self.folderSelected.insert(0, "Click here to select folder.")
 		self.folderSelected.bind("<Button-1>", getFolder)
 		self.folderSelected.place(x=273, y=46, width=477, height=22)
 		#self.folderSelected.grid(row=2,column=1)
