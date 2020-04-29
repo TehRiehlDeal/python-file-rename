@@ -39,7 +39,7 @@ class App:
 			""" Takes in the given show title and season number and renames all files within the folder. """
 			count = 1
 			for file in os.listdir(folder):
-				extension = "." + file.split(".")[len(file.split("."))-1]
+				extension = "." + file.split(".")[len(file.split("."))-1].lower()
 				if (extension in validExtensions):
 					episodeName = t.getEpisodeName(show, int(season), count)
 					if (count < 10):
@@ -92,39 +92,31 @@ class App:
 			self.rename.config(state=DISABLED, relief=SUNKEN)
 
 		self.input = Label(master, text="Show Name:")
-		#self.input.grid(row=0)
 		self.input.place(x=200, y=0)
 		self.show = Entry(master)
 		self.show.bind("<KeyRelease>", searchShow)
 		self.show.place(x=273, y=0, width=477, height=22)
-		#self.show.grid(row=0,column=1)
 
 		self.seasonInput = Label(master, text="Season Number:")
 		self.seasonInput.place(x=180, y=23)
-		#self.seasonInput.grid(row=1)
 		self.season = Entry(master, width="50")
 		self.season.place(x=273, y=23, width=477, height=22)
-		#self.season.grid(row=1,column=1)
 		
 		self.selectedFolder = Label(master, text="Selected Folder:")
 		self.selectedFolder.place(x=184, y=46)
-		#self.selectedFolder.grid(row=2)
 		self.folderSelected = Entry(master, width="50")
 		self.folderSelected.insert(0, "Click here to select folder.")
 		self.folderSelected.bind("<Button-1>", getFolder)
 		self.folderSelected.place(x=273, y=46, width=477, height=22)
-		#self.folderSelected.grid(row=2,column=1)
 
 		self.rename = Button(master, text="Rename Files", state=DISABLED, relief=SUNKEN)
 		self.rename.place(x=750, y=0, width=80, height=69)
-		#self.rename.grid(row=0, column=3, columnspan=2, rowspan=4, sticky='WENS')
 
 		"""
-		self.openFiles = Button(master, text="Select Folder", command=getFolder)
-		self.openFiles.grid(row=3)
-
 		self.quit = Button(master, text="Quit", command=root.destroy)
-		self.quit.grid(row=3,column=1)"""
+		self.quit.grid(row=3,column=1)
+		"""
+
 		self.Font = font.Font(size=8)
 
 		self.output = Text(master, state=DISABLED)
