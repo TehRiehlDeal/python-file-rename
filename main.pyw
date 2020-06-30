@@ -40,8 +40,9 @@ class App:
 			count = 1
 			for file in os.listdir(folder):
 				extension = "." + file.split(".")[len(file.split("."))-1].lower()
+				id = self.showID.get()
 				if (extension in validExtensions):
-					episodeName = t.getEpisodeName(show, int(season), count)
+					episodeName = t.getEpisodeName(show, int(season), count, 0.8, id)
 					if (count < 10):
 						if (int(season) >= 10):
 							episode = show + " S" + str(season) + "E0" + str(count) + \
@@ -95,7 +96,11 @@ class App:
 		self.input.place(x=200, y=0)
 		self.show = Entry(master)
 		self.show.bind("<KeyRelease>", searchShow)
-		self.show.place(x=273, y=0, width=477, height=22)
+		self.show.place(x=273, y=0, width=237, height=22)
+		self.id = Label(master, text="Show ID:", fg="grey")
+		self.id.place(x=512, y=0)
+		self.showID = Entry(master)
+		self.showID.place(x=562, y=0, width=188, height=22)
 
 		self.seasonInput = Label(master, text="Season Number:")
 		self.seasonInput.place(x=180, y=23)
