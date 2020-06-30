@@ -40,7 +40,10 @@ class App:
 			count = 1
 			for file in os.listdir(folder):
 				extension = "." + file.split(".")[len(file.split("."))-1].lower()
-				id = self.showID.get()
+				if (len(self.showID.get()) == 0):
+					id = None
+				else:
+					id = self.showID.get()
 				if (extension in validExtensions):
 					episodeName = t.getEpisodeName(show, int(season), count, 0.8, id)
 					if (count < 10):
