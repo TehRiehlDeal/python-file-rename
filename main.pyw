@@ -30,10 +30,24 @@ class App:
 				addRename()                        
 				self.folderSelected.delete(0, END)
 				self.folderSelected.insert(0,folder)
+			if (len(self.showID.get()) == 0):
+				searchShow()
 			
-		def searchShow(event):
+		def searchShow():
 			""" WIP to be used for live searching of show """
-			print (self.show.get())
+			shows = t.getShow(self.show.get())
+			if (len(shows['data']) > 1):
+				self.output.configure(state=NORMAL)
+				self.output.insert('end', "Multiple shows detected, please find the one you searched for and enter the ID in the box above." + "\n")
+				self.output.configure(state=DISABLED)
+				self.output.see('end')
+				self.output.update_idletasks()
+			for show in shows['data']:
+				self.output.configure(state=NORMAL)
+				self.output.insert('end', "Show Title: " + show['seriesName'] + " | Show ID: " + str(show['id']) + "\n")
+				self.output.configure(state=DISABLED)
+				self.output.update_idletasks()
+
 
 		def renameFiles(show, season):
 			""" Takes in the given show title and season number and renames all files within the folder. """
@@ -45,7 +59,7 @@ class App:
 				else:
 					id = self.showID.get()
 				if (extension in validExtensions):
-					episodeName = t.getEpisodeName(show, int(season), count, 0.8, id)
+					episodeName = t.getEpisodeName(show, int(season), count, id=id)
 					if (count < 10):
 						if (int(season) >= 10):
 							episode = show + " S" + str(season) + "E0" + str(count) + \
@@ -98,7 +112,7 @@ class App:
 		self.input = Label(master, text="Show Name:")
 		self.input.place(x=200, y=0)
 		self.show = Entry(master)
-		self.show.bind("<KeyRelease>", searchShow)
+		#self.show.bind("<KeyRelease>", searchShow)
 		self.show.place(x=273, y=0, width=237, height=22)
 		self.id = Label(master, text="Show ID:", fg="grey")
 		self.id.place(x=512, y=0)
