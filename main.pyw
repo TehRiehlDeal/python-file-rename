@@ -3,6 +3,7 @@ import sys
 import re
 from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk, Text, NORMAL, font, OptionMenu, StringVar
 from tvdbAPI import TVDB
+from File import File
 
 regex = re.compile(r'S\d*E\d*', re.IGNORECASE)
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -28,11 +29,20 @@ class App:
 				self.folderSelected.insert(0, "No folder selected, try again.")
 				delRename()
 			else:
+				grabFiles(folder)
 				addRename()                        
 				self.folderSelected.delete(0, END)
 				self.folderSelected.insert(0,folder)
 			if (len(self.showID.get()) == 0):
 				searchShow()
+
+		def grabFiles(folder):
+			count = 1
+			self.files = []
+			for file in os.listdir(folder):
+				
+				self.files.append(File(count, folder, file))
+				count += 1
 			
 		def searchShow():
 			""" WIP to be used for live searching of show """
@@ -52,9 +62,8 @@ class App:
 
 		def renameFiles(show, season):
 			""" Takes in the given show title and season number and renames all files within the folder. """
-			count = 1
-			for file in os.listdir(folder):
-				extension = "." + file.split(".")[len(file.split("."))-1].lower()
+			for file in self.files:
+				extension = "." + file.startName.split(".")[len(file.startName.split("."))-1].lower()
 				if (len(self.showID.get()) == 0):
 					id = None
 				else:
@@ -62,43 +71,45 @@ class App:
 				if (extension in validExtensions):
 					order = self.variable.get()
 					if 'AIRED' in order:
-						episodeName = t.getEpisodeName(show, int(season), count, order='AIRED', id=id)
+						episodeName = t.getEpisodeName(show, int(season), file.id, order='AIRED', id=id)
 					elif 'DVD' in order:
-						episodeName = t.getEpisodeName(show, int(season), count, order='DVD', id=id)
+						episodeName = t.getEpisodeName(show, int(season), file.id, order='DVD', id=id)
 					else:
-						episodeName = t.getEpisodeName(show, int(season), count, id=id)
-					if (count < 10):
+						episodeName = t.getEpisodeName(show, int(season), file.id, id=id)
+					if (file.id < 10):
 						if (int(season) >= 10):
-							episode = show + " S" + str(season) + "E0" + str(count) + \
+							episode = show + " S" + str(season) + "E0" + str(file.id) + \
 														" " + \
 														episodeName + \
 														extension
 						else:
 							episode = show + " S0" + \
-														str(season) + "E0" + str(count) + " " + \
+														str(season) + "E0" + str(file.id) + " " + \
 														episodeName + \
 														extension
 					else:
 						if (int(season) >= 10):
 							episode = show + " S" + \
-														str(season) + "E" + str(count) + " " + \
+														str(season) + "E" + str(file.id) + " " + \
 														episodeName + \
 														extension
 						else:
 							episode = show + " S0" + \
-														str(season) + "E" + str(count) + " " + \
+														str(season) + "E" + str(file.id) + " " + \
 														episodeName + \
 														extension
-
+					file.setEndName(episode)
 					self.output.configure(state=NORMAL)
-					self.output.insert('end', 'Renaming: ' + file + " --> " + episode + "\n")
+					self.output.insert('end', 'Renaming: ' + file.startName + " --> " + episode + "\n")
 					self.output.configure(state=DISABLED)
 					self.output.see('end')
 					self.output.update_idletasks()
-					print("Renaming: " + file)
-					os.rename(os.path.join(folder, file), os.path.join(folder, episode))
+					os.rename(os.path.join(folder, file.startName), os.path.join(folder, episode))
 
-					count+=1
+			self.undo = Button(master, text="Undo Rename")
+			self.undo.place(x=875, y=27)
+			self.undo.config(command=undoRename)
+
 			self.output.configure(state=NORMAL)
 			self.output.insert('end', "Renaming Complete.\n")
 			self.output.configure(state=DISABLED)
@@ -116,6 +127,19 @@ class App:
 			""" Deletes the rename button when no folder is selected. """
 			self.rename.config(state=DISABLED, relief=SUNKEN)
 
+		def undoRename():
+			for file in self.files:
+				self.output.configure(state=NORMAL)
+				self.output.insert('end', 'Undoing Rename: ' +
+				                   file.endName + " --> " + file.startName + "\n")
+				self.output.configure(state=DISABLED)
+				self.output.see('end')
+				self.output.update_idletasks()
+				os.rename(os.path.join(file.path, file.endName),
+                                    os.path.join(file.path, file.startName))
+
+			self.undo.destroy()
+
 		self.input = Label(master, text="Show Name:")
 		self.input.place(x=200, y=0)
 		self.show = Entry(master)
@@ -129,9 +153,9 @@ class App:
 		self.variable = StringVar(master)
 		self.variable.set(optionList[0])
 		self.orderLabel = Label(master, text="Order Type:")
-		self.orderLabel.place(x=50, y=8)
+		self.orderLabel.place(x=47, y=8)
 		self.order = OptionMenu(master, self.variable, *optionList)
-		self.order.place(x=50, y=27, width=100, height=22)
+		self.order.place(x=47, y=27, width=100, height=22)
 
 		self.seasonInput = Label(master, text="Season Number:")
 		self.seasonInput.place(x=180, y=23)
