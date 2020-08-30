@@ -1,7 +1,7 @@
 import os
 import sys
 import re
-from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk, Text, NORMAL, font
+from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk, Text, NORMAL, font, OptionMenu, StringVar
 from tvdbAPI import TVDB
 
 regex = re.compile(r'S\d*E\d*', re.IGNORECASE)
@@ -10,7 +10,8 @@ t = TVDB()
 favicon = os.path.join(dir_path, "favicon.ico")
 folder = ""
 clickCount = 0
-validExtensions = ['.mp4', '.mkv', '.avi', '.m4v', '.mov', '.ts', '.m2ts']
+validExtensions = ['.mp4', '.mkv', '.avi', '.m4v', '.mov', '.ts', '.m2ts', ".srt"]
+optionList = ['AIRED', 'DVD']
 class App:
 	def __init__(self,master):
 
@@ -59,7 +60,13 @@ class App:
 				else:
 					id = self.showID.get()
 				if (extension in validExtensions):
-					episodeName = t.getEpisodeName(show, int(season), count, id=id)
+					order = self.variable.get()
+					if 'AIRED' in order:
+						episodeName = t.getEpisodeName(show, int(season), count, order='AIRED', id=id)
+					elif 'DVD' in order:
+						episodeName = t.getEpisodeName(show, int(season), count, order='DVD', id=id)
+					else:
+						episodeName = t.getEpisodeName(show, int(season), count, id=id)
 					if (count < 10):
 						if (int(season) >= 10):
 							episode = show + " S" + str(season) + "E0" + str(count) + \
@@ -118,6 +125,13 @@ class App:
 		self.id.place(x=512, y=0)
 		self.showID = Entry(master)
 		self.showID.place(x=562, y=0, width=188, height=22)
+
+		self.variable = StringVar(master)
+		self.variable.set(optionList[0])
+		self.orderLabel = Label(master, text="Order Type:")
+		self.orderLabel.place(x=50, y=8)
+		self.order = OptionMenu(master, self.variable, *optionList)
+		self.order.place(x=50, y=27, width=100, height=22)
 
 		self.seasonInput = Label(master, text="Season Number:")
 		self.seasonInput.place(x=180, y=23)
