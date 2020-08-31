@@ -76,28 +76,9 @@ class App:
 						episodeName = t.getEpisodeName(show, int(season), file.id, order='DVD', id=id)
 					else:
 						episodeName = t.getEpisodeName(show, int(season), file.id, id=id)
-					if (file.id < 10):
-						if (int(season) >= 10):
-							episode = show + " S" + str(season) + "E0" + str(file.id) + \
-														" " + \
-														episodeName + \
-														extension
-						else:
-							episode = show + " S0" + \
-														str(season) + "E0" + str(file.id) + " " + \
-														episodeName + \
-														extension
-					else:
-						if (int(season) >= 10):
-							episode = show + " S" + \
-														str(season) + "E" + str(file.id) + " " + \
-														episodeName + \
-														extension
-						else:
-							episode = show + " S0" + \
-														str(season) + "E" + str(file.id) + " " + \
-														episodeName + \
-														extension
+
+					episode = show + " S" + "{0:0=2d}".format(int(season)) + "E" + "{0:0=2d}".format(file.id) + f" {episodeName}{extension}"
+					
 					file.setEndName(episode)
 					self.output.configure(state=NORMAL)
 					self.output.insert('end', 'Renaming: ' + file.startName + " --> " + episode + "\n")
