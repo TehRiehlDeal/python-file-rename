@@ -63,30 +63,7 @@ class App:
 		def renameFiles(show, season):
 			""" Takes in the given show title and season number and renames all files within the folder. """
 			grabFiles(folder)
-			for file in self.files:
-				extension = "." + file.startName.split(".")[len(file.startName.split("."))-1].lower()
-				if (len(self.showID.get()) == 0):
-					id = None
-				else:
-					id = self.showID.get()
-				if (extension in validExtensions):
-					order = self.variable.get()
-					if 'AIRED' in order:
-						episodeName = t.getEpisodeName(show, int(season), file.id, order='AIRED', id=id)
-					elif 'DVD' in order:
-						episodeName = t.getEpisodeName(show, int(season), file.id, order='DVD', id=id)
-					else:
-						episodeName = t.getEpisodeName(show, int(season), file.id, id=id)
-
-					episode = show + " S" + "{0:0=2d}".format(int(season)) + "E" + "{0:0=2d}".format(file.id) + f" {episodeName}{extension}"
-					
-					file.setEndName(episode)
-					self.output.configure(state=NORMAL)
-					self.output.insert('end', 'Renaming: ' + file.startName + " --> " + episode + "\n")
-					self.output.configure(state=DISABLED)
-					self.output.see('end')
-					self.output.update_idletasks()
-					os.rename(os.path.join(folder, file.startName), os.path.join(folder, episode))
+			_renameFiles(show, season, (len(self.files) - 1))
 
 			self.undo = Button(master, text="Undo Rename")
 			self.undo.place(x=875, y=27)
@@ -120,7 +97,55 @@ class App:
 				os.rename(os.path.join(file.path, file.endName),
                                     os.path.join(file.path, file.startName))
 
-			self.undo.destroy()			
+			self.undo.destroy()		
+
+		def _renameFiles(show, season, count):
+			extension = "." + \
+				self.files[count].startName.split(".")[len(self.files[count].startName.split("."))-1].lower()
+			if (len(self.showID.get()) == 0):
+				id = None
+			else:
+				id = self.showID.get()
+			if (extension in validExtensions):
+				if count == 0:				
+					episode = _generateFileName(id, extension, show, season, self.files[count])
+					self.files[count].setEndName(episode)
+					self.output.configure(state=NORMAL)
+					self.output.insert('end', 'Renaming: ' + self.files[count].startName + " --> " + episode + "\n")
+					self.output.configure(state=DISABLED)
+					self.output.see('end')
+					self.output.update_idletasks()
+					os.rename(os.path.join(folder, self.files[count].startName), os.path.join(folder, episode))
+					return
+				else:
+					episode = _generateFileName(id, extension, show, season, self.files[count])
+					self.files[count].setEndName(episode)
+					self.output.configure(state=NORMAL)
+					self.output.insert('end', 'Renaming: ' +
+					                   self.files[count].startName + " --> " + episode + "\n")
+					self.output.configure(state=DISABLED)
+					self.output.see('end')
+					self.output.update_idletasks()
+					os.rename(os.path.join(folder, self.files[count].startName), os.path.join(folder, episode))
+					_renameFiles(show, season, count-1)
+					return
+			else:
+				return
+
+		def _generateFileName(id, extension, show, season, file):
+			
+			order = self.variable.get()
+			if 'AIRED' in order:
+				episodeName = t.getEpisodeName(show, int(season), file.id, order='AIRED', id=id)
+			elif 'DVD' in order:
+				episodeName = t.getEpisodeName(show, int(season), file.id, order='DVD', id=id)
+			else:
+				episodeName = t.getEpisodeName(show, int(season), file.id, id=id)
+
+			episode = show + " S" + "{0:0=2d}".format(int(season)) + "E" + "{0:0=2d}".format(file.id) + f" {episodeName}{extension}"
+
+			return episode
+					
 
 		self.input = Label(master, text="Show Name:")
 		self.input.place(x=200, y=0)
