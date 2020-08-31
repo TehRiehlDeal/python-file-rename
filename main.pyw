@@ -29,7 +29,7 @@ class App:
 				self.folderSelected.insert(0, "No folder selected, try again.")
 				delRename()
 			else:
-				grabFiles(folder)
+				#grabFiles(folder)
 				addRename()                        
 				self.folderSelected.delete(0, END)
 				self.folderSelected.insert(0,folder)
@@ -62,6 +62,7 @@ class App:
 
 		def renameFiles(show, season):
 			""" Takes in the given show title and season number and renames all files within the folder. """
+			grabFiles(folder)
 			for file in self.files:
 				extension = "." + file.startName.split(".")[len(file.startName.split("."))-1].lower()
 				if (len(self.showID.get()) == 0):
@@ -76,28 +77,9 @@ class App:
 						episodeName = t.getEpisodeName(show, int(season), file.id, order='DVD', id=id)
 					else:
 						episodeName = t.getEpisodeName(show, int(season), file.id, id=id)
-					if (file.id < 10):
-						if (int(season) >= 10):
-							episode = show + " S" + str(season) + "E0" + str(file.id) + \
-														" " + \
-														episodeName + \
-														extension
-						else:
-							episode = show + " S0" + \
-														str(season) + "E0" + str(file.id) + " " + \
-														episodeName + \
-														extension
-					else:
-						if (int(season) >= 10):
-							episode = show + " S" + \
-														str(season) + "E" + str(file.id) + " " + \
-														episodeName + \
-														extension
-						else:
-							episode = show + " S0" + \
-														str(season) + "E" + str(file.id) + " " + \
-														episodeName + \
-														extension
+
+					episode = show + " S" + "{0:0=2d}".format(int(season)) + "E" + "{0:0=2d}".format(file.id) + f" {episodeName}{extension}"
+					
 					file.setEndName(episode)
 					self.output.configure(state=NORMAL)
 					self.output.insert('end', 'Renaming: ' + file.startName + " --> " + episode + "\n")
@@ -138,7 +120,7 @@ class App:
 				os.rename(os.path.join(file.path, file.endName),
                                     os.path.join(file.path, file.startName))
 
-			self.undo.destroy()
+			self.undo.destroy()			
 
 		self.input = Label(master, text="Show Name:")
 		self.input.place(x=200, y=0)
