@@ -53,11 +53,11 @@ class App:
 				self.output.configure(state=DISABLED)
 				self.output.see('end')
 				self.output.update_idletasks()
-			for show in shows['data']:
-				self.output.configure(state=NORMAL)
-				self.output.insert('end', "Show Title: " + show['seriesName'] + " | Show ID: " + str(show['id']) + "\n")
-				self.output.configure(state=DISABLED)
-				self.output.update_idletasks()
+				for show in shows['data']:
+					self.output.configure(state=NORMAL)
+					self.output.insert('end', "Show Title: " + show['seriesName'] + " | Show ID: " + str(show['id']) + "\n")
+					self.output.configure(state=DISABLED)
+					self.output.update_idletasks()
 
 
 		def renameFiles(show, season):
@@ -152,11 +152,6 @@ class App:
 
 		self.rename = Button(master, text="Rename Files", state=DISABLED, relief=SUNKEN)
 		self.rename.place(x=750, y=0, width=80, height=69)
-
-		"""
-		self.quit = Button(master, text="Quit", command=root.destroy)
-		self.quit.grid(row=3,column=1)
-		"""
 
 		self.Font = font.Font(size=8)
 
