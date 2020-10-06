@@ -30,7 +30,6 @@ class App:
 				self.folderSelected.insert(0, "No folder selected, try again.")
 				delRename()
 			else:
-				grabFiles(folder)
 				addRename()                        
 				self.folderSelected.delete(0, END)
 				self.folderSelected.insert(0,folder)
@@ -63,6 +62,7 @@ class App:
 
 		def renameFiles(show, season):
 			""" Takes in the given show title and season number and renames all files within the folder. """
+			grabFiles(folder)
 			for file in self.files:
 				extension = "." + file.startName.split(".")[len(file.startName.split("."))-1].lower()
 				if (len(self.showID.get()) == 0):
