@@ -5,6 +5,7 @@ import re
 from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk, Text, NORMAL, font, OptionMenu, StringVar
 from tvdbAPI import TVDB
 from File import File
+import webbrowser
 
 regex = re.compile(r'S\d*E\d*', re.IGNORECASE)
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -39,8 +40,7 @@ class App:
 		def grabFiles(folder):
 			count = 1
 			self.files = []
-			for file in os.listdir(folder):
-				
+			for file in os.listdir(folder):				
 				self.files.append(File(count, folder, file))
 				count += 1
 			
@@ -55,7 +55,11 @@ class App:
 				self.output.update_idletasks()
 				for show in shows['data']:
 					self.output.configure(state=NORMAL)
-					self.output.insert('end', "Show Title: " + show['seriesName'] + " | Show ID: " + str(show['id']) + "\n")
+					self.output.insert('end', "Show Title: " + show['seriesName'] + " | Show ID: ")
+					self.output.insert('end', str(show['id']), (str(show['slug']), str(1)))
+					self.output.insert('end', "\n")
+					self.output.tag_config(str(show['slug']), foreground="blue")
+					self.output.tag_bind(str(show['slug']), '<Button-1>', lambda event, url = "https://thetvdb.com/series/" + str(show["slug"]): openLink(url))
 					self.output.configure(state=DISABLED)
 					self.output.update_idletasks()
 
@@ -87,6 +91,7 @@ class App:
 					self.output.see('end')
 					self.output.update_idletasks()
 					os.rename(os.path.join(folder, file.startName), os.path.join(folder, episode))
+					
 
 			self.undo = Button(master, text="Undo Rename")
 			self.undo.place(x=875, y=27)
@@ -121,6 +126,9 @@ class App:
                                     os.path.join(file.path, file.startName))
 
 			self.undo.destroy()
+
+		def openLink(url):
+			webbrowser.open_new(url)
 
 		self.input = Label(master, text="Show Name:")
 		self.input.place(x=200, y=0)
