@@ -81,8 +81,10 @@ class App:
 						episodeName = t.getEpisodeName(show, int(season), file.id, order='DVD', id=id)
 					else:
 						episodeName = t.getEpisodeName(show, int(season), file.id, id=id)
-
-					episode = show + " S" + "{0:0=2d}".format(int(season)) + "E" + "{0:0=2d}".format(file.id) + f" {episodeName}{extension}"
+					if len(self.files) >= 100:
+						episode = show + " S" + "{0:0=2d}".format(int(season)) + "E" + "{0:0=3d}".format(file.id) + f" {episodeName}{extension}"
+					else:
+						episode = show + " S" + "{0:0=2d}".format(int(season)) + "E" + "{0:0=2d}".format(file.id) + f" {episodeName}{extension}"
 					
 					file.setEndName(episode)
 					self.output.configure(state=NORMAL)
