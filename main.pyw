@@ -3,13 +3,13 @@ import os
 import sys
 import re
 from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk, Text, NORMAL, font, OptionMenu, StringVar
-from tvdbAPI import TVDB
+from tmdbAPI import TMDB
 from File import File
 import webbrowser
 
 regex = re.compile(r'S\d*E\d*', re.IGNORECASE)
 dir_path = os.path.dirname(os.path.realpath(__file__))
-t = TVDB()
+t = TMDB()
 favicon = os.path.join(dir_path, "favicon.ico")
 folder = ""
 clickCount = 0
@@ -47,19 +47,19 @@ class App:
 		def searchShow():
 			""" WIP to be used for live searching of show """
 			shows = t.getShow(self.show.get())
-			if (len(shows['data']) > 1):
+			if (len(shows['results']) > 1):
 				self.output.configure(state=NORMAL)
 				self.output.insert('end', "Multiple shows detected, please find the one you searched for and enter the ID in the box above." + "\n")
 				self.output.configure(state=DISABLED)
 				self.output.see('end')
 				self.output.update_idletasks()
-				for show in shows['data']:
+				for show in shows['results']:
 					self.output.configure(state=NORMAL)
-					self.output.insert('end', "Show Title: " + show['seriesName'] + " | Show ID: ")
-					self.output.insert('end', str(show['id']), (str(show['slug']), str(1)))
+					self.output.insert('end', "Show Title: " + show['name'] + " | Show ID: ")
+					self.output.insert('end', str(show['id']), (str(show['id']), str(1)))
 					self.output.insert('end', "\n")
-					self.output.tag_config(str(show['slug']), foreground="blue")
-					self.output.tag_bind(str(show['slug']), '<Button-1>', lambda event, url = "https://thetvdb.com/series/" + str(show["slug"]): openLink(url))
+					self.output.tag_config(str(show['id']), foreground="blue")
+					self.output.tag_bind(str(show['id']), '<Button-1>', lambda event, url = "https://www.themoviedb.org/tv/" + str(show["id"]) + "-" + str(show['name']): openLink(url))
 					self.output.configure(state=DISABLED)
 					self.output.update_idletasks()
 
@@ -74,13 +74,7 @@ class App:
 				else:
 					id = self.showID.get()
 				if (extension in validExtensions):
-					order = self.variable.get()
-					if 'AIRED' in order:
-						episodeName = t.getEpisodeName(show, int(season), file.id, order='AIRED', id=id)
-					elif 'DVD' in order:
-						episodeName = t.getEpisodeName(show, int(season), file.id, order='DVD', id=id)
-					else:
-						episodeName = t.getEpisodeName(show, int(season), file.id, id=id)
+					episodeName = t.getEpisodeName(show, int(season), file.id, id=id)
 					if len(self.files) >= 100:
 						episode = show + " S" + "{0:0=2d}".format(int(season)) + "E" + "{0:0=3d}".format(file.id) + f" {episodeName}{extension}"
 					else:
