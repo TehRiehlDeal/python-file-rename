@@ -67,6 +67,9 @@ class App:
 		def renameFiles(show, season):
 			""" Takes in the given show title and season number and renames all files within the folder. """
 			grabFiles(folder)
+			
+			self.undo.config(command=undoRename, state=ACTIVE, relief=RAISED)
+
 			for file in self.files:
 				extension = "." + file.startName.split(".")[len(file.startName.split("."))-1].lower()
 				if (len(self.showID.get()) == 0):
@@ -86,12 +89,7 @@ class App:
 					self.output.configure(state=DISABLED)
 					self.output.see('end')
 					self.output.update_idletasks()
-					os.rename(os.path.join(folder, file.startName), os.path.join(folder, episode))
-					
-
-			self.undo = Button(master, text="Undo Rename")
-			self.undo.place(x=875, y=27)
-			self.undo.config(command=undoRename)
+					os.rename(os.path.join(folder, file.startName), os.path.join(folder, episode))					
 
 			self.output.configure(state=NORMAL)
 			self.output.insert('end', "Renaming Complete.\n")
@@ -100,6 +98,7 @@ class App:
 			self.output.update_idletasks()
 					
 			self.folderSelected.delete(0, END)
+			self.selectFolder.config(relief=RAISED)
 			delRename()
 
 		def addRename():
@@ -121,7 +120,7 @@ class App:
 				os.rename(os.path.join(file.path, file.endName),
                                     os.path.join(file.path, file.startName))
 
-			self.undo.destroy()
+			self.undo.config(state=DISABLED, relief=SUNKEN)
 
 		def openLink(url):
 			webbrowser.open_new(url)
@@ -151,12 +150,16 @@ class App:
 		self.selectedFolder = Label(master, text="Selected Folder:")
 		self.selectedFolder.place(x=184, y=46)
 		self.folderSelected = Entry(master, width="50")
-		self.folderSelected.insert(0, "Click here to select folder.")
-		self.folderSelected.bind("<Button-1>", getFolder)
-		self.folderSelected.place(x=273, y=46, width=477, height=22)
+		self.folderSelected.place(x=273, y=46, width=377, height=22)
+		self.selectFolder = Button(master, text="Select Folder")
+		self.selectFolder.place(x=650, y=47, width= 100, height=20)
+		self.selectFolder.bind("<Button-1>", getFolder)
 
 		self.rename = Button(master, text="Rename Files", state=DISABLED, relief=SUNKEN)
 		self.rename.place(x=750, y=0, width=80, height=69)
+
+		self.undo = Button(master, text="Undo Rename", state=DISABLED, relief=SUNKEN)
+		self.undo.place(x=875, y=27)
 
 		self.Font = font.Font(size=8)
 
