@@ -8,6 +8,7 @@ from File import File
 import webbrowser
 
 regex = re.compile(r'S\d*E\d*', re.IGNORECASE)
+multiEpRegex = re.compile(r'E\d*-E\d*', re.IGNORECASE)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 t = TMDB()
 favicon = os.path.join(dir_path, "favicon.ico")
@@ -40,9 +41,18 @@ class App:
 		def grabFiles(folder):
 			count = 1
 			self.files = []
-			for file in os.listdir(folder):				
-				self.files.append(File(count, folder, file))
-				count += 1
+			for file in os.listdir(folder):
+				if (re.search(multiEpRegex, file) != None):
+					match = re.search(multiEpRegex, file)
+					episodes = match.group(0)
+					episodes = episodes.replace("E", "")
+					episodes = episodes.split("-")
+					numEp = int(episodes[1]) - int(episodes[0])
+					self.files.append(File(count, folder, file, multiEpisode=True, numEp=numEp))
+					count += 1
+				else:
+					self.files.append(File(count, folder, file))
+					count += 1
 			
 		def searchShow():
 			""" WIP to be used for live searching of show """
@@ -66,22 +76,47 @@ class App:
 
 		def renameFiles(show, season):
 			""" Takes in the given show title and season number and renames all files within the folder. """
-			grabFiles(folder)
+			grabFiles(self.folderSelected.get())
 			
 			self.undo.config(command=undoRename, state=ACTIVE, relief=RAISED)
-
+			count = 1
 			for file in self.files:
 				extension = "." + file.startName.split(".")[len(file.startName.split("."))-1].lower()
+				episodeName = ""
+				episodeNumber = ""
 				if (len(self.showID.get()) == 0):
 					id = None
 				else:
 					id = self.showID.get()
 				if (extension in validExtensions):
-					episodeName = t.getEpisodeName(show, int(season), file.id, id=id)
-					if len(self.files) >= 100:
-						episode = show + " S" + "{0:0=2d}".format(int(season)) + "E" + "{0:0=3d}".format(file.id) + f" {episodeName}{extension}"
+					if (file.numEp > 0):
+						i = 0
+						while i <= file.numEp:
+							if (i == 0):
+								episodeName = t.getEpisodeName(show, int(season), count, id=id)
+								if len(self.files) >= 100:
+									episodeNumber = "E{0:0=3d}".format(count)
+								else:
+									episodeNumber = "E{0:0=2d}".format(count)
+							elif (i == file.numEp):
+								episodeName = episodeName + " - " + t.getEpisodeName(show, int(season), count, id=id)
+								if len(self.files) >= 100:
+									episodeNumber = episodeNumber + "-" + "E{0:0=3d}".format(count)
+								else:
+									episodeNumber = episodeNumber + "-" + "E{0:0=2d}".format(count)
+							else:
+								episodeName = episodeName + " - " + t.getEpisodeName(show, int(season), count, id=id)								
+							count += 1
+							i += 1
 					else:
-						episode = show + " S" + "{0:0=2d}".format(int(season)) + "E" + "{0:0=2d}".format(file.id) + f" {episodeName}{extension}"
+						episodeName = t.getEpisodeName(show, int(season), count, id=id)
+						if len(self.files) >= 100:
+							episodeNumber = "E{0:0=3d}".format(count)
+						else:
+							episodeNumber = "E{0:0=2d}".format(count)
+						count += 1
+
+					episode = show + " S" + "{0:0=2d}".format(int(season)) + episodeNumber + f" {episodeName}{extension}"
 					
 					file.setEndName(episode)
 					self.output.configure(state=NORMAL)
@@ -97,9 +132,7 @@ class App:
 			self.output.see("end")
 			self.output.update_idletasks()
 					
-			self.folderSelected.delete(0, END)
 			self.selectFolder.config(relief=RAISED)
-			delRename()
 
 		def addRename():
 			""" Adds the button used to rename the files in a folder. """
