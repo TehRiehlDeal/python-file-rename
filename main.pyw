@@ -124,7 +124,7 @@ class App:
 					self.output.configure(state=DISABLED)
 					self.output.see('end')
 					self.output.update_idletasks()
-					os.rename(os.path.join(self.folderSelected.get(), file.startName), os.path.join(folder, episode))					
+					os.rename(os.path.join(self.folderSelected.get(), file.startName), os.path.join(self.folderSelected.get(), episode))					
 
 			self.output.configure(state=NORMAL)
 			self.output.insert('end', "Renaming Complete.\n")
