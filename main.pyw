@@ -80,10 +80,14 @@ class App:
 			
 			self.undo.config(command=undoRename, state=ACTIVE, relief=RAISED)
 			count = 1
+			skipEpisodes = self.skipEpisodes.get().split(",")
 			for file in self.files:
 				extension = "." + file.startName.split(".")[len(file.startName.split("."))-1].lower()
 				episodeName = ""
 				episodeNumber = ""
+				for ep in skipEpisodes:
+					if str(count) == ep:
+						count += 1
 				if (len(self.showID.get()) == 0):
 					id = None
 				else:
@@ -168,12 +172,17 @@ class App:
 		self.showID = Entry(master)
 		self.showID.place(x=562, y=0, width=188, height=22)
 
-		self.variable = StringVar(master)
-		self.variable.set(optionList[0])
-		self.orderLabel = Label(master, text="Order Type:")
-		self.orderLabel.place(x=47, y=8)
-		self.order = OptionMenu(master, self.variable, *optionList)
-		self.order.place(x=47, y=27, width=100, height=22)
+		# self.variable = StringVar(master)
+		# self.variable.set(optionList[0])
+		# self.orderLabel = Label(master, text="Order Type:")
+		# self.orderLabel.place(x=47, y=8)
+		# self.order = OptionMenu(master, self.variable, *optionList)
+		# self.order.place(x=47, y=27, width=100, height=22)
+
+		self.skipEpisodeLabel = Label(master, text="Skip Renaming Episodes:")
+		self.skipEpisodeLabel.place(x=32, y=8)
+		self.skipEpisodes = Entry(master)
+		self.skipEpisodes.place(x=47, y=27, width=100, height=22)
 
 		self.seasonInput = Label(master, text="Season Number:")
 		self.seasonInput.place(x=180, y=23)
