@@ -72,6 +72,8 @@ class App:
 					self.output.tag_bind(str(show['id']), '<Button-1>', lambda event, url = "https://www.themoviedb.org/tv/" + str(show["id"]) + "-" + str(show['name']): openLink(url))
 					self.output.configure(state=DISABLED)
 					self.output.update_idletasks()
+			elif (len(shows['results']) == 1):
+				self.showID.insert('end', shows['results'][0]['id']) 
 
 
 		def renameFiles(show, season):
