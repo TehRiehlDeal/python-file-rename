@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 import os
-import sys
 import re
-from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk, Text, NORMAL, font, OptionMenu, StringVar
+from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk, Text, NORMAL, font
 from tmdbAPI import TMDB
 from File import File
 import webbrowser
@@ -15,7 +14,7 @@ favicon = os.path.join(dir_path, "favicon.ico")
 folder = ""
 clickCount = 0
 validExtensions = ['.mp4', '.mkv', '.avi', '.m4v', '.mov', '.ts', '.m2ts', ".srt"]
-optionList = ['AIRED', 'DVD']
+
 class App:
 	def __init__(self,master):
 
@@ -167,21 +166,13 @@ class App:
 		self.input = Label(master, text="Show Name:")
 		self.input.place(x=200, y=0)
 		self.show = Entry(master)
-		#self.show.bind("<KeyRelease>", searchShow)
 		self.show.place(x=273, y=0, width=237, height=22)
 		self.id = Label(master, text="Show ID:", fg="grey")
 		self.id.place(x=512, y=0)
 		self.showID = Entry(master)
 		self.showID.place(x=562, y=0, width=188, height=22)
 
-		# self.variable = StringVar(master)
-		# self.variable.set(optionList[0])
-		# self.orderLabel = Label(master, text="Order Type:")
-		# self.orderLabel.place(x=47, y=8)
-		# self.order = OptionMenu(master, self.variable, *optionList)
-		# self.order.place(x=47, y=27, width=100, height=22)
-
-		self.skipEpisodeLabel = Label(master, text="Skip Renaming Episodes:")
+		self.skipEpisodeLabel = Label(master, text="Skip Missing Episodes:")
 		self.skipEpisodeLabel.place(x=32, y=8)
 		self.skipEpisodes = Entry(master)
 		self.skipEpisodes.place(x=47, y=27, width=100, height=22)
