@@ -40,7 +40,7 @@ class App:
 		def grabFiles(folder):
 			count = 1
 			self.files = []
-			for file in os.listdir(folder):
+			for file in sorted(os.listdir(folder)):
 				if (re.search(multiEpRegex, file) != None):
 					match = re.search(multiEpRegex, file)
 					episodes = match.group(0)
