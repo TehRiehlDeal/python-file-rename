@@ -45,6 +45,7 @@ class App:
 					match = re.search(multiEpRegex, file)
 					episodes = match.group(0)
 					episodes = episodes.replace("E", "")
+					episodes = episodes.replace("e", "")
 					episodes = episodes.split("-")
 					numEp = int(episodes[1]) - int(episodes[0])
 					self.files.append(File(count, folder, file, multiEpisode=True, numEp=numEp))
