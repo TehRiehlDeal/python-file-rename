@@ -2,14 +2,26 @@
 import os
 import re
 from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk, Text, NORMAL, font
-from tmdbAPI import TMDB
+try:
+	from tmdbAPI import TMDB, ShowNotFound, NoSuchEpisode, InvalidShowID, InvalidInput, InvalidCredentials
+	tmdbImported = True
+except ImportError:
+	tmdbImported = False
+	raise ImportError("Unable to import tmdbAPI, please make sure it is installed globally with pip3")
+try:
+	from tvdbAPI import TVDB, ShowNotFound, NoSuchEpisode, InvalidShowID, InvalidInput, InvalidCredentials
+	tvdbImported = True
+except ImportError:
+	tvdbImported = False
+	raise ImportError("Unable to import tvdbAPI, please make sure it is installed globally with pip3")	
 from File import File
 import webbrowser
 
 regex = re.compile(r'S\d*E\d*', re.IGNORECASE)
 multiEpRegex = re.compile(r'E\d*-E\d*', re.IGNORECASE)
 dir_path = os.path.dirname(os.path.realpath(__file__))
-t = TMDB()
+tmdb = TMDB()
+tvdb = TVDB()
 favicon = os.path.join(dir_path, "favicon.ico")
 folder = ""
 clickCount = 0
@@ -35,7 +47,10 @@ class App:
 				self.folderSelected.delete(0, END)
 				self.folderSelected.insert(0,folder)
 			if (len(self.showID.get()) == 0):
-				searchShow()
+				if (tvdbImported):
+					searchShowTVDB()
+				else:
+					searchShowTMDB()
 
 		def grabFiles(folder):
 			count = 1
@@ -54,91 +69,287 @@ class App:
 					self.files.append(File(count, folder, file))
 					count += 1
 			
-		def searchShow():
-			""" WIP to be used for live searching of show """
-			shows = t.getShow(self.show.get())
-			if (len(shows['results']) > 1):
-				self.output.configure(state=NORMAL)
-				self.output.insert('end', "Multiple shows detected, please find the one you searched for and enter the ID in the box above." + "\n")
-				self.output.configure(state=DISABLED)
-				self.output.see('end')
-				self.output.update_idletasks()
-				for show in shows['results']:
+		def searchShowTVDB():
+			global tvdbImported
+			try: 
+				shows = tvdb.getShow(self.show.get())
+				if (len(shows['data']) > 1 ):
 					self.output.configure(state=NORMAL)
-					self.output.insert('end', "Show Title: " + show['name'] + " | Show ID: ")
-					self.output.insert('end', str(show['id']), (str(show['id']), str(1)))
-					self.output.insert('end', "\n")
-					self.output.tag_config(str(show['id']), foreground="blue")
-					self.output.tag_bind(str(show['id']), '<Button-1>', lambda event, url = "https://www.themoviedb.org/tv/" + str(show["id"]) + "-" + str(show['name']): openLink(url))
-					self.output.configure(state=DISABLED)
-					self.output.update_idletasks()
-			elif (len(shows['results']) == 1):
-				self.showID.insert('end', shows['results'][0]['id']) 
-
-
-		def renameFiles(show, season):
-			""" Takes in the given show title and season number and renames all files within the folder. """
-			grabFiles(self.folderSelected.get())
-			
-			self.undo.config(command=undoRename, state=ACTIVE, relief=RAISED)
-			count = 1
-			skipEpisodes = self.skipEpisodes.get().split(",")
-			for file in self.files:
-				extension = "." + file.startName.split(".")[len(file.startName.split("."))-1].lower()
-				episodeName = ""
-				episodeNumber = ""
-				for ep in skipEpisodes:
-					if str(count) == ep:
-						count += 1
-				if (len(self.showID.get()) == 0):
-					id = None
-				else:
-					id = self.showID.get()
-				if (extension in validExtensions):
-					if (file.numEp > 0):
-						i = 0
-						while i <= file.numEp:
-							if (i == 0):
-								episodeName = t.getEpisodeName(show, int(season), count, id=id)
-								if len(self.files) >= 100:
-									episodeNumber = "E{0:0=3d}".format(count)
-								else:
-									episodeNumber = "E{0:0=2d}".format(count)
-							elif (i == file.numEp):
-								episodeName = episodeName + " - " + t.getEpisodeName(show, int(season), count, id=id)
-								if len(self.files) >= 100:
-									episodeNumber = episodeNumber + "-" + "E{0:0=3d}".format(count)
-								else:
-									episodeNumber = episodeNumber + "-" + "E{0:0=2d}".format(count)
-							else:
-								episodeName = episodeName + " - " + t.getEpisodeName(show, int(season), count, id=id)								
-							count += 1
-							i += 1
-					else:
-						episodeName = t.getEpisodeName(show, int(season), count, id=id)
-						if len(self.files) >= 100:
-							episodeNumber = "E{0:0=3d}".format(count)
-						else:
-							episodeNumber = "E{0:0=2d}".format(count)
-						count += 1
-
-					episode = show + " S" + "{0:0=2d}".format(int(season)) + episodeNumber + f" {episodeName}{extension}"
-					
-					file.setEndName(episode)
-					self.output.configure(state=NORMAL)
-					self.output.insert('end', 'Renaming: ' + file.startName + " --> " + episode + "\n")
+					self.output.insert('end', "Multiple shows detected, please find the one you searched for and enter the ID in the box above." + "\n")
 					self.output.configure(state=DISABLED)
 					self.output.see('end')
 					self.output.update_idletasks()
-					os.rename(os.path.join(self.folderSelected.get(), file.startName), os.path.join(self.folderSelected.get(), episode))					
+					for show in shows['data']:
+						self.output.configure(state=NORMAL)
+						self.output.insert('end', "Show Title: " + show['seriesName'] + " | Show ID: ")
+						self.output.insert('end', str(show['id']), (str(show['id']), str(1)))
+						self.output.insert('end', "\n")
+						self.output.tag_config(str(show['id']), foreground="blue")
+						self.output.tag_bind(str(show['id']), '<Button-1>', lambda event, url = "https://thetvdb.com/series/" + str(show['slug']): openLink(url))
+						self.output.configure(state=DISABLED)
+						self.output.update_idletasks()
+				elif (len(shows['data']) == 1):
+					self.showID.insert('end', shows['data'][0]['id'])
+			except InvalidCredentials:
+				self.output.configure(state=NORMAL)
+				self.output.insert('end', "Unable to authorize with TMDB rolling back to use TMDB.")
+				self.output.configure(state=DISABLED)
+				self.output.see('end')
+				self.output.update_idletasks()
+				tvdbImported = False
+				searchShowTMDB()
+			except ShowNotFound:
+				self.output.configure(state=NORMAL)
+				self.output.insert('end', "Unable to find any shows with TVDB rolling back to use TMDB.")
+				self.output.configure(state=DISABLED)
+				self.output.see('end')
+				self.output.update_idletasks()
+				searchShowTMDB()
+			 
 
-			self.output.configure(state=NORMAL)
-			self.output.insert('end', "Renaming Complete.\n")
-			self.output.configure(state=DISABLED)
-			self.output.see("end")
-			self.output.update_idletasks()
-					
-			self.selectFolder.config(relief=RAISED)
+		def searchShowTMDB():
+			""" WIP to be used for live searching of show """
+			global tmdbImported
+			try:
+				shows = tmdb.getShow(self.show.get())
+				if (len(shows['results']) > 1):
+					self.output.configure(state=NORMAL)
+					self.output.insert('end', "Multiple shows detected, please find the one you searched for and enter the ID in the box above." + "\n")
+					self.output.configure(state=DISABLED)
+					self.output.see('end')
+					self.output.update_idletasks()
+					for show in shows['results']:
+						self.output.configure(state=NORMAL)
+						self.output.insert('end', "Show Title: " + show['name'] + " | Show ID: ")
+						self.output.insert('end', str(show['id']), (str(show['id']), str(1)))
+						self.output.insert('end', "\n")
+						self.output.tag_config(str(show['id']), foreground="blue")
+						self.output.tag_bind(str(show['id']), '<Button-1>', lambda event, url = "https://www.themoviedb.org/tv/" + str(show["id"]) + "-" + str(show['name']): openLink(url))
+						self.output.configure(state=DISABLED)
+						self.output.update_idletasks()
+				elif (len(shows['results']) == 1):
+					self.showID.insert('end', shows['results'][0]['id']) 
+			except InvalidCredentials:
+				self.output.configure(state=NORMAL)
+				self.output.insert('end', "Unable to authorize with TMDB, you will be unable to pull any episode title data.")
+				self.output.configure(state=DISABLED)
+				self.output.see('end')
+				self.output.update_idletasks()
+				tmdbImported = False
+			except ShowNotFound:
+				self.output.configure(state=NORMAL)
+				self.output.insert('end', "Unable to find shows with TMDB, check for any spelling errors in provided title and try again.")
+				self.output.configure(state=DISABLED)
+				self.output.see('end')
+				self.output.update_idletasks()
+
+
+		def renameFilesTVDB(show, season):
+			try:
+				grabFiles(self.folderSelected.get())
+				
+				self.undo.config(command=undoRename, state=ACTIVE, relief=RAISED)
+				count = 1
+				skipEpisodes = self.skipEpisodes.get().split(",")
+				for file in self.files:
+					extension = "." + file.startName.split(".")[len(file.startName.split("."))-1].lower()
+					episodeName = ""
+					episodeNumber = ""
+					for ep in skipEpisodes:
+						if str(count) == ep:
+							count += 1
+					if (len(self.showID.get()) == 0):
+						id = None
+					else:
+						id = self.showID.get()
+					if (extension in validExtensions):
+						if (file.numEp > 0):
+							i = 0
+							while i <= file.numEp:
+								if (i == 0):
+									episodeName = tvdb.getEpisodeName(show, int(season), count, id=id)
+									if len(self.files) >= 100:
+										episodeNumber = "E{0:0=3d}".format(count)
+									else:
+										episodeNumber = "E{0:0=2d}".format(count)
+								elif (i == file.numEp):
+									episodeName = episodeName + " - " + tvdb.getEpisodeName(show, int(season), count, id=id)
+									if len(self.files) >= 100:
+										episodeNumber = episodeNumber + "-" + "E{0:0=3d}".format(count)
+									else:
+										episodeNumber = episodeNumber + "-" + "E{0:0=2d}".format(count)
+								else:
+									episodeName = episodeName + " - " + tvdb.getEpisodeName(show, int(season), count, id=id)								
+								count += 1
+								i += 1
+						else:
+							episodeName = tvdb.getEpisodeName(show, int(season), count, id=id)
+							if len(self.files) >= 100:
+								episodeNumber = "E{0:0=3d}".format(count)
+							else:
+								episodeNumber = "E{0:0=2d}".format(count)
+							count += 1
+
+						episode = show + " S" + "{0:0=2d}".format(int(season)) + episodeNumber + f" {episodeName}{extension}"
+						
+						file.setEndName(episode)
+						self.output.configure(state=NORMAL)
+						self.output.insert('end', 'Renaming: ' + file.startName + " --> " + episode + "\n")
+						self.output.configure(state=DISABLED)
+						self.output.see('end')
+						self.output.update_idletasks()
+						os.rename(os.path.join(self.folderSelected.get(), file.startName), os.path.join(self.folderSelected.get(), episode))					
+
+				self.output.configure(state=NORMAL)
+				self.output.insert('end', "Renaming Complete.\n")
+				self.output.configure(state=DISABLED)
+				self.output.see("end")
+				self.output.update_idletasks()
+						
+				self.selectFolder.config(relief=RAISED)
+			except NoSuchEpisode:
+				self.output.configure(state=NORMAL)
+				self.output.insert('end', "No episode found in season for episode number, possibly too many files in folder.\n")
+				self.output.configure(state=DISABLED)
+				self.output.see("end")
+				self.output.update_idletasks()
+						
+				self.selectFolder.config(relief=RAISED)
+
+		def renameFilesTMDB(show, season):
+			try:
+				grabFiles(self.folderSelected.get())
+				
+				self.undo.config(command=undoRename, state=ACTIVE, relief=RAISED)
+				count = 1
+				skipEpisodes = self.skipEpisodes.get().split(",")
+				for file in self.files:
+					extension = "." + file.startName.split(".")[len(file.startName.split("."))-1].lower()
+					episodeName = ""
+					episodeNumber = ""
+					for ep in skipEpisodes:
+						if str(count) == ep:
+							count += 1
+					if (len(self.showID.get()) == 0):
+						id = None
+					else:
+						id = self.showID.get()
+					if (extension in validExtensions):
+						if (file.numEp > 0):
+							i = 0
+							while i <= file.numEp:
+								if (i == 0):
+									episodeName = tmdb.getEpisodeName(show, int(season), count, id=id)
+									if len(self.files) >= 100:
+										episodeNumber = "E{0:0=3d}".format(count)
+									else:
+										episodeNumber = "E{0:0=2d}".format(count)
+								elif (i == file.numEp):
+									episodeName = episodeName + " - " + tmdb.getEpisodeName(show, int(season), count, id=id)
+									if len(self.files) >= 100:
+										episodeNumber = episodeNumber + "-" + "E{0:0=3d}".format(count)
+									else:
+										episodeNumber = episodeNumber + "-" + "E{0:0=2d}".format(count)
+								else:
+									episodeName = episodeName + " - " + tmdb.getEpisodeName(show, int(season), count, id=id)								
+								count += 1
+								i += 1
+						else:
+							episodeName = tmdb.getEpisodeName(show, int(season), count, id=id)
+							if len(self.files) >= 100:
+								episodeNumber = "E{0:0=3d}".format(count)
+							else:
+								episodeNumber = "E{0:0=2d}".format(count)
+							count += 1
+
+						episode = show + " S" + "{0:0=2d}".format(int(season)) + episodeNumber + f" {episodeName}{extension}"
+						
+						file.setEndName(episode)
+						self.output.configure(state=NORMAL)
+						self.output.insert('end', 'Renaming: ' + file.startName + " --> " + episode + "\n")
+						self.output.configure(state=DISABLED)
+						self.output.see('end')
+						self.output.update_idletasks()
+						os.rename(os.path.join(self.folderSelected.get(), file.startName), os.path.join(self.folderSelected.get(), episode))					
+
+				self.output.configure(state=NORMAL)
+				self.output.insert('end', "Renaming Complete.\n")
+				self.output.configure(state=DISABLED)
+				self.output.see("end")
+				self.output.update_idletasks()
+						
+				self.selectFolder.config(relief=RAISED)
+			except NoSuchEpisode:
+				self.output.configure(state=NORMAL)
+				self.output.insert('end', "No episode found in season for episode number, possibly too many files in folder.\n")
+				self.output.configure(state=DISABLED)
+				self.output.see("end")
+				self.output.update_idletasks()
+						
+				self.selectFolder.config(relief=RAISED)
+
+		def renameFiles(show, season):
+			""" Takes in the given show title and season number and renames all files within the folder. """
+			if (tvdbImported):
+				renameFilesTVDB(show, season)
+			elif (tmdbImported):
+				renameFilesTMDB(show, season)
+			else:
+				grabFiles(self.folderSelected.get())
+				
+				self.undo.config(command=undoRename, state=ACTIVE, relief=RAISED)
+				count = 1
+				skipEpisodes = self.skipEpisodes.get().split(",")
+				for file in self.files:
+					extension = "." + file.startName.split(".")[len(file.startName.split("."))-1].lower()
+					episodeNumber = ""
+					for ep in skipEpisodes:
+						if str(count) == ep:
+							count += 1
+					if (len(self.showID.get()) == 0):
+						id = None
+					else:
+						id = self.showID.get()
+					if (extension in validExtensions):
+						if (file.numEp > 0):
+							i = 0
+							while i <= file.numEp:
+								if (i == 0):
+									if len(self.files) >= 100:
+										episodeNumber = "E{0:0=3d}".format(count)
+									else:
+										episodeNumber = "E{0:0=2d}".format(count)
+								elif (i == file.numEp):
+									if len(self.files) >= 100:
+										episodeNumber = episodeNumber + "-" + "E{0:0=3d}".format(count)
+									else:
+										episodeNumber = episodeNumber + "-" + "E{0:0=2d}".format(count)								
+								count += 1
+								i += 1
+						else:
+							if len(self.files) >= 100:
+								episodeNumber = "E{0:0=3d}".format(count)
+							else:
+								episodeNumber = "E{0:0=2d}".format(count)
+							count += 1
+
+						episode = show + " S" + "{0:0=2d}".format(int(season)) + episodeNumber
+						
+						file.setEndName(episode)
+						self.output.configure(state=NORMAL)
+						self.output.insert('end', 'Renaming: ' + file.startName + " --> " + episode + "\n")
+						self.output.configure(state=DISABLED)
+						self.output.see('end')
+						self.output.update_idletasks()
+						os.rename(os.path.join(self.folderSelected.get(), file.startName), os.path.join(self.folderSelected.get(), episode))					
+
+				self.output.configure(state=NORMAL)
+				self.output.insert('end', "Renaming Complete.\n")
+				self.output.configure(state=DISABLED)
+				self.output.see("end")
+				self.output.update_idletasks()
+						
+				self.selectFolder.config(relief=RAISED)
 
 		def addRename():
 			""" Adds the button used to rename the files in a folder. """
