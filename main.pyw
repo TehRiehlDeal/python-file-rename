@@ -92,7 +92,7 @@ class App:
 					self.showID.insert('end', shows['data'][0]['id'])
 			except InvalidCredentials:
 				self.output.configure(state=NORMAL)
-				self.output.insert('end', "Unable to authorize with TMDB rolling back to use TMDB.")
+				self.output.insert('end', "Unable to authorize with TMDB falling back to use TMDB.")
 				self.output.configure(state=DISABLED)
 				self.output.see('end')
 				self.output.update_idletasks()
@@ -100,7 +100,7 @@ class App:
 				searchShowTMDB()
 			except ShowNotFound:
 				self.output.configure(state=NORMAL)
-				self.output.insert('end', "Unable to find any shows with TVDB rolling back to use TMDB.")
+				self.output.insert('end', "Unable to find any shows with TVDB falling back to use TMDB.")
 				self.output.configure(state=DISABLED)
 				self.output.see('end')
 				self.output.update_idletasks()
