@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import os
 import re
-from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk, Text, NORMAL, font
+from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk, Text, NORMAL, font, StringVar, OptionMenu
 try:
 	from tmdbAPI import TMDB, ShowNotFound, NoSuchEpisode, InvalidShowID, InvalidInput, InvalidCredentials
 	tmdbImported = True
@@ -26,6 +26,7 @@ favicon = os.path.join(dir_path, "favicon.ico")
 folder = ""
 clickCount = 0
 validExtensions = ['.mp4', '.mkv', '.avi', '.m4v', '.mov', '.ts', '.m2ts', ".srt"]
+optionList = ['AIRED', 'DVD']
 
 class App:
 	def __init__(self,master):
@@ -163,27 +164,28 @@ class App:
 					else:
 						id = self.showID.get()
 					if (extension in validExtensions):
+						order = self.variable.get()
 						if (file.numEp > 0):
 							i = 0
 							while i <= file.numEp:
 								if (i == 0):
-									episodeName = tvdb.getEpisodeName(show, int(season), count, id=id)
+									episodeName = tvdb.getEpisodeName(show, int(season), count, id=id, order=order)
 									if len(self.files) >= 100:
 										episodeNumber = "E{0:0=3d}".format(count)
 									else:
 										episodeNumber = "E{0:0=2d}".format(count)
 								elif (i == file.numEp):
-									episodeName = episodeName + " - " + tvdb.getEpisodeName(show, int(season), count, id=id)
+									episodeName = episodeName + " - " + tvdb.getEpisodeName(show, int(season), count, id=id, order=order)
 									if len(self.files) >= 100:
 										episodeNumber = episodeNumber + "-" + "E{0:0=3d}".format(count)
 									else:
 										episodeNumber = episodeNumber + "-" + "E{0:0=2d}".format(count)
 								else:
-									episodeName = episodeName + " - " + tvdb.getEpisodeName(show, int(season), count, id=id)								
+									episodeName = episodeName + " - " + tvdb.getEpisodeName(show, int(season), count, id=id, order=order)								
 								count += 1
 								i += 1
 						else:
-							episodeName = tvdb.getEpisodeName(show, int(season), count, id=id)
+							episodeName = tvdb.getEpisodeName(show, int(season), count, id=id, order=order)
 							if len(self.files) >= 100:
 								episodeNumber = "E{0:0=3d}".format(count)
 							else:
@@ -385,14 +387,21 @@ class App:
 		self.showID.place(x=562, y=0, width=188, height=22)
 
 		self.skipEpisodeLabel = Label(master, text="Skip Missing Episodes:")
-		self.skipEpisodeLabel.place(x=32, y=8)
+		self.skipEpisodeLabel.place(x=320, y=23)
 		self.skipEpisodes = Entry(master)
-		self.skipEpisodes.place(x=47, y=27, width=100, height=22)
+		self.skipEpisodes.place(x=442, y=23, width=308, height=22)
 
 		self.seasonInput = Label(master, text="Season Number:")
 		self.seasonInput.place(x=180, y=23)
 		self.season = Entry(master, width="50")
-		self.season.place(x=273, y=23, width=477, height=22)
+		self.season.place(x=273, y=23, width=45, height=22)
+
+		self.variable = StringVar(master)
+		self.variable.set(optionList[0])
+		self.orderLabel = Label(master, text="Order Type:")
+		self.orderLabel.place(x=8, y=24)
+		self.order = OptionMenu(master, self.variable, *optionList)
+		self.order.place(x=75, y=24, width=75, height=22)
 		
 		self.selectedFolder = Label(master, text="Selected Folder:")
 		self.selectedFolder.place(x=184, y=46)
