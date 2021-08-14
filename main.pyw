@@ -209,6 +209,7 @@ class App:
 				self.output.update_idletasks()
 						
 				self.selectFolder.config(relief=RAISED)
+
 			except NoSuchEpisode:
 				self.output.configure(state=NORMAL)
 				self.output.insert('end', "No episode found in season for episode number, possibly too many files in folder.\n")
@@ -281,6 +282,7 @@ class App:
 				self.output.update_idletasks()
 						
 				self.selectFolder.config(relief=RAISED)
+
 			except NoSuchEpisode:
 				self.output.configure(state=NORMAL)
 				self.output.insert('end', "No episode found in season for episode number, possibly too many files in folder.\n")
@@ -386,15 +388,15 @@ class App:
 		self.showID = Entry(master)
 		self.showID.place(x=562, y=0, width=188, height=22)
 
-		self.skipEpisodeLabel = Label(master, text="Skip Missing Episodes:")
-		self.skipEpisodeLabel.place(x=320, y=23)
-		self.skipEpisodes = Entry(master)
-		self.skipEpisodes.place(x=442, y=23, width=308, height=22)
-
 		self.seasonInput = Label(master, text="Season Number:")
 		self.seasonInput.place(x=180, y=23)
 		self.season = Entry(master, width="50")
 		self.season.place(x=273, y=23, width=45, height=22)
+		
+		self.skipEpisodeLabel = Label(master, text="Skip Missing Episodes:")
+		self.skipEpisodeLabel.place(x=320, y=23)
+		self.skipEpisodes = Entry(master)
+		self.skipEpisodes.place(x=442, y=23, width=308, height=22)
 
 		self.variable = StringVar(master)
 		self.variable.set(optionList[0])
