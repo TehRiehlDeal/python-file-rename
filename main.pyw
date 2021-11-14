@@ -26,7 +26,10 @@ favicon = os.path.join(dir_path, "favicon.ico")
 folder = ""
 clickCount = 0
 validExtensions = ['.mp4', '.mkv', '.avi', '.m4v', '.mov', '.ts', '.m2ts', ".srt"]
-optionList = ['AIRED', 'DVD']
+siteList = ['TVDB', 'TMDB']
+orderOptionList = ['AIRED', 'DVD']
+tvdbActive = True
+tmdbActive = True
 
 class App:
 	def __init__(self,master):
@@ -48,9 +51,9 @@ class App:
 				self.folderSelected.delete(0, END)
 				self.folderSelected.insert(0,folder)
 			if (len(self.showID.get()) == 0):
-				if (tvdbImported):
+				if 'TVDB' in self.site.get():
 					searchShowTVDB()
-				else:
+				elif 'TMDB' in self.site.get():
 					searchShowTMDB()
 
 		def grabFiles(folder):
@@ -71,11 +74,13 @@ class App:
 					count += 1
 			
 		def searchShowTVDB():
-			global tvdbImported
+			global tvdbActive
 			try: 
 				shows = tvdb.getShow(self.show.get())
 				if (len(shows['data']) > 1 ):
 					self.output.configure(state=NORMAL)
+					if len(self.output.get(1.0, END)) > 0:
+						self.output.delete(1.0, END)
 					self.output.insert('end', "Multiple shows detected, please find the one you searched for and enter the ID in the box above." + "\n")
 					self.output.configure(state=DISABLED)
 					self.output.see('end')
@@ -93,28 +98,30 @@ class App:
 					self.showID.insert('end', shows['data'][0]['id'])
 			except InvalidCredentials:
 				self.output.configure(state=NORMAL)
-				self.output.insert('end', "Unable to authorize with TMDB falling back to use TMDB.")
+				self.output.insert(
+					'end', "Unable to authorize with TVDB, try selecting TMDB. Otherwise you will be unable to grab episode data.")
 				self.output.configure(state=DISABLED)
 				self.output.see('end')
 				self.output.update_idletasks()
-				tvdbImported = False
-				searchShowTMDB()
+				tvdbActive = False
 			except ShowNotFound:
 				self.output.configure(state=NORMAL)
-				self.output.insert('end', "Unable to find any shows with TVDB falling back to use TMDB.")
+				self.output.insert(
+					'end', "Unable to find any shows with TVDB, try selecting TMDB. Otherwise you will be unable to grab episode data.")
 				self.output.configure(state=DISABLED)
 				self.output.see('end')
 				self.output.update_idletasks()
-				searchShowTMDB()
 			 
 
 		def searchShowTMDB():
 			""" WIP to be used for live searching of show """
-			global tmdbImported
+			global tmdbActive
 			try:
 				shows = tmdb.getShow(self.show.get())
 				if (len(shows['results']) > 1):
 					self.output.configure(state=NORMAL)
+					if len(self.output.get(1.0, END)) > 0:
+						self.output.delete(1.0, END)
 					self.output.insert('end', "Multiple shows detected, please find the one you searched for and enter the ID in the box above." + "\n")
 					self.output.configure(state=DISABLED)
 					self.output.see('end')
@@ -132,11 +139,11 @@ class App:
 					self.showID.insert('end', shows['results'][0]['id']) 
 			except InvalidCredentials:
 				self.output.configure(state=NORMAL)
-				self.output.insert('end', "Unable to authorize with TMDB, you will be unable to pull any episode title data.")
+				self.output.insert('end', "Unable to authorize with TMDB, try selecting TVDB. Otherwise you will be unable to grab episode data.")
 				self.output.configure(state=DISABLED)
 				self.output.see('end')
 				self.output.update_idletasks()
-				tmdbImported = False
+				tmdbActive = False
 			except ShowNotFound:
 				self.output.configure(state=NORMAL)
 				self.output.insert('end', "Unable to find shows with TMDB, check for any spelling errors in provided title and try again.")
@@ -294,9 +301,11 @@ class App:
 
 		def renameFiles(show, season):
 			""" Takes in the given show title and season number and renames all files within the folder. """
-			if (tvdbImported):
+			global tvdbActive
+			global tmdbActive
+			if ('TVDB' in self.site.get() and tvdbActive):
 				renameFilesTVDB(show, season)
-			elif (tmdbImported):
+			elif ('TMDB' in self.site.get() and tmdbActive):
 				renameFilesTMDB(show, season)
 			else:
 				grabFiles(self.folderSelected.get())
@@ -379,6 +388,24 @@ class App:
 		def openLink(url):
 			webbrowser.open_new(url)
 
+		def toggleEpisodeOrder(*args):
+			if 'TVDB' in self.site.get():
+				if len(self.folderSelected.get()) > 0 and 'No Folder Selected' not in self.folderSelected.get():
+					searchShowTVDB()
+				self.showID.delete(0, END)
+				self.orderLabel.destroy()
+				self.order.destroy()
+				self.orderLabel = Label(master, text="Order Type:")
+				self.orderLabel.place(x=8, y=34)
+				self.order = OptionMenu(master, self.variable, *orderOptionList)
+				self.order.place(x=75, y=34, width=75, height=22)
+			elif 'TMDB' in self.site.get():
+				if len(self.folderSelected.get()) > 0 and 'No Folder Selected' not in self.folderSelected.get():
+					searchShowTMDB()
+				self.showID.delete(0, END)
+				self.orderLabel.destroy()
+				self.order.destroy()
+
 		self.input = Label(master, text="Show Name:")
 		self.input.place(x=200, y=0)
 		self.show = Entry(master)
@@ -398,12 +425,19 @@ class App:
 		self.skipEpisodes = Entry(master)
 		self.skipEpisodes.place(x=442, y=23, width=308, height=22)
 
+		self.site = StringVar(master)
+		self.site.set(siteList[0])
+		self.siteSelectionLabel = Label(master, text="Site:")
+		self.siteSelectionLabel.place(x=8, y=12)
+		self.SiteSelection = OptionMenu(master, self.site, *siteList, command=toggleEpisodeOrder)
+		self.SiteSelection.place(x=75, y=12, width=75, height=22)
+		
 		self.variable = StringVar(master)
-		self.variable.set(optionList[0])
+		self.variable.set(orderOptionList[0])
 		self.orderLabel = Label(master, text="Order Type:")
-		self.orderLabel.place(x=8, y=24)
-		self.order = OptionMenu(master, self.variable, *optionList)
-		self.order.place(x=75, y=24, width=75, height=22)
+		self.orderLabel.place(x=8, y=34)
+		self.order = OptionMenu(master, self.variable, *orderOptionList)
+		self.order.place(x=75, y=34, width=75, height=22)
 		
 		self.selectedFolder = Label(master, text="Selected Folder:")
 		self.selectedFolder.place(x=184, y=46)
