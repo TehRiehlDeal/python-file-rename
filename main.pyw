@@ -406,25 +406,44 @@ class App:
 				self.orderLabel.destroy()
 				self.order.destroy()
 
+		def clearAll(event):
+			self.show.delete(0, END)
+			self.showID.delete(0, END)
+			self.season.delete(0, END)
+			self.skipEpisodes.delete(0, END)
+			self.folderSelected.delete(0, END)
+			self.undo.config(state=DISABLED, relief=SUNKEN)
+
+		#Show Name
 		self.input = Label(master, text="Show Name:")
 		self.input.place(x=200, y=0)
 		self.show = Entry(master)
 		self.show.place(x=273, y=0, width=237, height=22)
+
+		#Show ID
 		self.id = Label(master, text="Show ID:", fg="grey")
 		self.id.place(x=512, y=0)
 		self.showID = Entry(master)
 		self.showID.place(x=562, y=0, width=188, height=22)
 
+		#Show Season
 		self.seasonInput = Label(master, text="Season Number:")
 		self.seasonInput.place(x=180, y=23)
 		self.season = Entry(master, width="50")
 		self.season.place(x=273, y=23, width=45, height=22)
 		
+		#Skipped Episodes
 		self.skipEpisodeLabel = Label(master, text="Skip Missing Episodes:")
 		self.skipEpisodeLabel.place(x=320, y=23)
 		self.skipEpisodes = Entry(master)
-		self.skipEpisodes.place(x=442, y=23, width=308, height=22)
+		self.skipEpisodes.place(x=442, y=23, width=208, height=22)
 
+		#Clear Button
+		self.clearButton = Button(master, text="CLEAR ALL", fg="Red")
+		self.clearButton.place(x=650, y=23, width=100, height=22)
+		self.clearButton.bind("<Button-1>", clearAll)
+
+		#Metadata Site Selector
 		self.site = StringVar(master)
 		self.site.set(siteList[0])
 		self.siteSelectionLabel = Label(master, text="Site:")
@@ -432,6 +451,7 @@ class App:
 		self.SiteSelection = OptionMenu(master, self.site, *siteList, command=toggleEpisodeOrder)
 		self.SiteSelection.place(x=75, y=12, width=75, height=22)
 		
+		#Episode Ordering Selector
 		self.variable = StringVar(master)
 		self.variable.set(orderOptionList[0])
 		self.orderLabel = Label(master, text="Order Type:")
@@ -439,6 +459,7 @@ class App:
 		self.order = OptionMenu(master, self.variable, *orderOptionList)
 		self.order.place(x=75, y=34, width=75, height=22)
 		
+		#Selected Folder
 		self.selectedFolder = Label(master, text="Selected Folder:")
 		self.selectedFolder.place(x=184, y=46)
 		self.folderSelected = Entry(master, width="50")
@@ -447,14 +468,17 @@ class App:
 		self.selectFolder.place(x=650, y=47, width= 100, height=20)
 		self.selectFolder.bind("<Button-1>", getFolder)
 
+		#Rename Button
 		self.rename = Button(master, text="Rename Files", state=DISABLED, relief=SUNKEN)
 		self.rename.place(x=750, y=0, width=80, height=69)
 
+		#Undo Button
 		self.undo = Button(master, text="Undo Rename", state=DISABLED, relief=SUNKEN)
 		self.undo.place(x=875, y=27)
 
 		self.Font = font.Font(size=8)
 
+		#Output Text Box
 		self.output = Text(master, state=DISABLED)
 		self.output['font'] = self.Font
 		self.output.place(x=0, y=70, width=1024, height=219)
