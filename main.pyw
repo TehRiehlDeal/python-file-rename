@@ -84,7 +84,7 @@ class App:
 					self.output.insert('end', "Multiple shows detected, please find the one you searched for and enter the ID in the box above." + "\n")
 					self.output.configure(state=DISABLED)
 					self.output.see('end')
-					self.output.update_idletasks()
+					self.output.update()
 					for show in shows['data']:
 						self.output.configure(state=NORMAL)
 						self.output.insert('end', "Show Title: " + show['seriesName'] + " | Show ID: ")
@@ -93,7 +93,7 @@ class App:
 						self.output.tag_config(str(show['id']), foreground="blue")
 						self.output.tag_bind(str(show['id']), '<Button-1>', lambda event, url = "https://thetvdb.com/series/" + str(show['slug']): openLink(url))
 						self.output.configure(state=DISABLED)
-						self.output.update_idletasks()
+						self.output.update()
 				elif (len(shows['data']) == 1):
 					self.showID.insert('end', shows['data'][0]['id'])
 			except InvalidCredentials:
@@ -102,7 +102,7 @@ class App:
 					'end', "Unable to authorize with TVDB, try selecting TMDB. Otherwise you will be unable to grab episode data.")
 				self.output.configure(state=DISABLED)
 				self.output.see('end')
-				self.output.update_idletasks()
+				self.output.update()
 				tvdbActive = False
 			except ShowNotFound:
 				self.output.configure(state=NORMAL)
@@ -110,7 +110,7 @@ class App:
 					'end', "Unable to find any shows with TVDB, try selecting TMDB. Otherwise you will be unable to grab episode data.")
 				self.output.configure(state=DISABLED)
 				self.output.see('end')
-				self.output.update_idletasks()
+				self.output.update()
 			 
 
 		def searchShowTMDB():
@@ -125,7 +125,7 @@ class App:
 					self.output.insert('end', "Multiple shows detected, please find the one you searched for and enter the ID in the box above." + "\n")
 					self.output.configure(state=DISABLED)
 					self.output.see('end')
-					self.output.update_idletasks()
+					self.output.update()
 					for show in shows['results']:
 						self.output.configure(state=NORMAL)
 						self.output.insert('end', "Show Title: " + show['name'] + " | Show ID: ")
@@ -134,7 +134,7 @@ class App:
 						self.output.tag_config(str(show['id']), foreground="blue")
 						self.output.tag_bind(str(show['id']), '<Button-1>', lambda event, url = "https://www.themoviedb.org/tv/" + str(show["id"]) + "-" + str(show['name']): openLink(url))
 						self.output.configure(state=DISABLED)
-						self.output.update_idletasks()
+						self.output.update()
 				elif (len(shows['results']) == 1):
 					self.showID.insert('end', shows['results'][0]['id']) 
 			except InvalidCredentials:
@@ -142,14 +142,14 @@ class App:
 				self.output.insert('end', "Unable to authorize with TMDB, try selecting TVDB. Otherwise you will be unable to grab episode data.")
 				self.output.configure(state=DISABLED)
 				self.output.see('end')
-				self.output.update_idletasks()
+				self.output.update()
 				tmdbActive = False
 			except ShowNotFound:
 				self.output.configure(state=NORMAL)
 				self.output.insert('end', "Unable to find shows with TMDB, check for any spelling errors in provided title and try again.")
 				self.output.configure(state=DISABLED)
 				self.output.see('end')
-				self.output.update_idletasks()
+				self.output.update()
 
 
 		def renameFilesTVDB(show, season):
@@ -206,14 +206,14 @@ class App:
 						self.output.insert('end', 'Renaming: ' + file.startName + " --> " + episode + "\n")
 						self.output.configure(state=DISABLED)
 						self.output.see('end')
-						self.output.update_idletasks()
+						self.output.update()
 						os.rename(os.path.join(self.folderSelected.get(), file.startName), os.path.join(self.folderSelected.get(), episode))					
 
 				self.output.configure(state=NORMAL)
 				self.output.insert('end', "Renaming Complete.\n")
 				self.output.configure(state=DISABLED)
 				self.output.see("end")
-				self.output.update_idletasks()
+				self.output.update()
 						
 				self.selectFolder.config(relief=RAISED)
 
@@ -222,7 +222,7 @@ class App:
 				self.output.insert('end', "No episode found in season for episode number, possibly too many files in folder.\n")
 				self.output.configure(state=DISABLED)
 				self.output.see("end")
-				self.output.update_idletasks()
+				self.output.update()
 						
 				self.selectFolder.config(relief=RAISED)
 
@@ -279,14 +279,14 @@ class App:
 						self.output.insert('end', 'Renaming: ' + file.startName + " --> " + episode + "\n")
 						self.output.configure(state=DISABLED)
 						self.output.see('end')
-						self.output.update_idletasks()
+						self.output.update()
 						os.rename(os.path.join(self.folderSelected.get(), file.startName), os.path.join(self.folderSelected.get(), episode))					
 
 				self.output.configure(state=NORMAL)
 				self.output.insert('end', "Renaming Complete.\n")
 				self.output.configure(state=DISABLED)
 				self.output.see("end")
-				self.output.update_idletasks()
+				self.output.update()
 						
 				self.selectFolder.config(relief=RAISED)
 
@@ -295,7 +295,7 @@ class App:
 				self.output.insert('end', "No episode found in season for episode number, possibly too many files in folder.\n")
 				self.output.configure(state=DISABLED)
 				self.output.see("end")
-				self.output.update_idletasks()
+				self.output.update()
 						
 				self.selectFolder.config(relief=RAISED)
 
@@ -353,14 +353,14 @@ class App:
 						self.output.insert('end', 'Renaming: ' + file.startName + " --> " + episode + "\n")
 						self.output.configure(state=DISABLED)
 						self.output.see('end')
-						self.output.update_idletasks()
+						self.output.update()
 						os.rename(os.path.join(self.folderSelected.get(), file.startName), os.path.join(self.folderSelected.get(), episode))					
 
 				self.output.configure(state=NORMAL)
 				self.output.insert('end', "Renaming Complete.\n")
 				self.output.configure(state=DISABLED)
 				self.output.see("end")
-				self.output.update_idletasks()
+				self.output.update()
 						
 				self.selectFolder.config(relief=RAISED)
 
@@ -379,7 +379,7 @@ class App:
 				                   file.endName + " --> " + file.startName + "\n")
 				self.output.configure(state=DISABLED)
 				self.output.see('end')
-				self.output.update_idletasks()
+				self.output.update()
 				os.rename(os.path.join(file.path, file.endName),
                                     os.path.join(file.path, file.startName))
 
