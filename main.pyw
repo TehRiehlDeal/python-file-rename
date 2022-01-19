@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 import os
 import re
-from tkinter import filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk, Text, NORMAL, font, StringVar, OptionMenu
+from tkinter import NE, NW, PhotoImage, filedialog, END, ACTIVE, RAISED, DISABLED, SUNKEN, Label, Entry, Button, Tk, Text, NORMAL, font, StringVar, OptionMenu, Canvas
+from urllib.request import urlopen
 try:
 	from tmdbAPI import TMDB, ShowNotFound, NoSuchEpisode, InvalidShowID, InvalidInput, InvalidCredentials
 	tmdbImported = True
@@ -9,13 +10,15 @@ except ImportError:
 	tmdbImported = False
 	raise ImportError("Unable to import tmdbAPI, please make sure it is installed globally with pip3")
 try:
-	from tvdbAPI import TVDB, ShowNotFound, NoSuchEpisode, InvalidShowID, InvalidInput, InvalidCredentials
+	from tvdbAPI import TVDB, ShowNotFound, NoSuchEpisode, InvalidShowID, InvalidInput, InvalidCredentials, NoImagesFound
 	tvdbImported = True
 except ImportError:
 	tvdbImported = False
 	raise ImportError("Unable to import tvdbAPI, please make sure it is installed globally with pip3")	
 from File import File
 import webbrowser
+from PIL import Image, ImageTk
+import io
 
 regex = re.compile(r'S\d*E\d*', re.IGNORECASE)
 multiEpRegex = re.compile(r'E\d*-E\d*', re.IGNORECASE)
@@ -92,6 +95,8 @@ class App:
 						self.output.insert('end', "\n")
 						self.output.tag_config(str(show['id']), foreground="blue")
 						self.output.tag_bind(str(show['id']), '<Button-1>', lambda event, url = "https://thetvdb.com/series/" + str(show['slug']): openLink(url))
+						self.output.tag_bind(str(show['id']), '<Enter>', lambda event, showName=show['slug']: showImage(showName))
+						self.output.tag_bind(str(show['id']), '<Leave>', lambda event, showName=show['slug']: hideImage())
 						self.output.configure(state=DISABLED)
 						self.output.update()
 				elif (len(shows['data']) == 1):
@@ -111,7 +116,27 @@ class App:
 				self.output.configure(state=DISABLED)
 				self.output.see('end')
 				self.output.update()
-			 
+
+		def showImage(showName):
+			try: 
+				imageUrl = tvdb.getImages(showName, 'poster')[0]
+				raw_image = urlopen(imageUrl).read()
+				b64_image = Image.open(io.BytesIO(raw_image))
+				resized_image = b64_image.resize((149, 219))
+				image = ImageTk.PhotoImage(resized_image)
+				self.canvas.create_image(0, 0, anchor=NW, image=image)
+				self.canvas.image = image
+			except (NoImagesFound, ShowNotFound):
+				imageUrl = "https://theriehldeal.com/noimagesfound.jpg"
+				raw_image = urlopen(imageUrl).read()
+				b64_image = Image.open(io.BytesIO(raw_image))
+				resized_image = b64_image.resize((149, 219))
+				image = ImageTk.PhotoImage(resized_image)
+				self.canvas.create_image(0, 0, anchor=NW, image=image)
+				self.canvas.image = image
+			
+		def hideImage():
+			self.canvas.delete("all")
 
 		def searchShowTMDB():
 			""" WIP to be used for live searching of show """
@@ -385,6 +410,12 @@ class App:
 
 			self.undo.config(state=DISABLED, relief=SUNKEN)
 
+			self.output.configure(state=NORMAL)
+			self.output.insert('end', "Undo Complete.\n")
+			self.output.configure(state=DISABLED)
+			self.output.see("end")
+			self.output.update()
+
 		def openLink(url):
 			webbrowser.open_new(url)
 
@@ -481,7 +512,10 @@ class App:
 		#Output Text Box
 		self.output = Text(master, state=DISABLED)
 		self.output['font'] = self.Font
-		self.output.place(x=0, y=70, width=1024, height=219)
+		self.output.place(x=0, y=70, width=875, height=219)
+
+		self.canvas = Canvas(master, height=219, width=149)
+		self.canvas.place(x=875, y=70)
 
 root = Tk()
 root.geometry("1024x289") #477x89
