@@ -1,2 +1,3 @@
 tvdbAPI >= 0.2.8
 tmdbAPI >= 0.1.2
+Pillow >= 9.2.0
